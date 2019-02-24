@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/apply_volunteership"
+            android:icon="@drawable/create_zone"
+            android:title="Apply for volunteership"
+            android:visible="false"/>
+        <item
+            android:id="@+id/status"
+            android:icon="@drawable/create_zone"
+            android:title="Status"
+            android:visible="false"
+            />
+        <item
+            android:id="@+id/approve_volunteers"
+            android:icon="@drawable/maps"
+            android:title="Approve Volunteers"
+            android:visible="false"
+            />
+        <item
+            android:id="@+id/wall"
+            android:icon="@drawable/maps"
+            android:title="Wall"
+            />
+        <item
+            android:id="@+id/map"
+            android:icon="@drawable/maps"
+            android:title="Map"
+            />
+        <item
+            android:id="@+id/accSetting"
+            android:title="Account setting"
+            android:icon="@drawable/account_settings_icon"/>
+
+        <item
+            android:id="@+id/logout"
+            android:icon="@drawable/logout_icon"
+            android:title="Logout"
+            />
+    </group>
+
+</menu>

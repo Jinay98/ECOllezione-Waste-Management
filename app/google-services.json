@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "247321353524",
+    "firebase_url": "https://sihfirebaseproject-c7e0e.firebaseio.com",
+    "project_id": "sihfirebaseproject-c7e0e",
+    "storage_bucket": "sihfirebaseproject-c7e0e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:247321353524:android:e6dcd1e42db845fc",
+        "android_client_info": {
+          "package_name": "com.example.android.wastemanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "247321353524-37ae7v8j9jod1jmbcq132lumnbaeelcd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.android.wastemanagement",
+            "certificate_hash": "0fce6665f744ce436accff9b9c960f675e63c2e1"
+          }
+        },
+        {
+          "client_id": "247321353524-5rt811v2nfgnepbrg4t1rcr4e6vhdkbq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB7ByBw9EhUfEPnZLokUSLUI8pGtkbmbaY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "247321353524-5rt811v2nfgnepbrg4t1rcr4e6vhdkbq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
