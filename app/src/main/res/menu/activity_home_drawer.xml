@@ -10,10 +10,10 @@
             android:title="Apply for volunteership"
             android:visible="false"/>
         <item
-            android:id="@+id/status"
+            android:id="@+id/scan"
             android:icon="@drawable/create_zone"
-            android:title="Status"
-            android:visible="false"
+            android:title="Scan"
+
             />
         <item
             android:id="@+id/approve_volunteers"

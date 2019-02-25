@@ -52,7 +52,9 @@
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"></activity>
+            android:label="@string/title_activity_maps" />
+        <activity android:name=".Scan" />
+        <activity android:name=".ScanQ"></activity>
     </application>
 
 </manifest>

@@ -27,19 +27,12 @@
         </FrameLayout>
     </android.support.design.widget.AppBarLayout>
 
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+    <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="500dp"/>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_bookList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:clipToPadding="false"
-            android:background="#f2f2f2"
-            android:paddingBottom="5dp"/>
 
-    </android.support.v4.widget.SwipeRefreshLayout>
 
 </android.widget.LinearLayout>

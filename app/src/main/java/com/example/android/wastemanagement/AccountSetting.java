@@ -87,6 +87,21 @@ public class AccountSetting extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 userType = dataSnapshot.getValue(String.class);
+                db = FirebaseDatabase.getInstance().getReference().child(userType).child(auth.getUid()).child("userImgUrl");
+                db.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        String url = dataSnapshot.getValue(String.class);
+                        if(!url.equals("no")){
+                            Glide.with(getApplicationContext()).load(dataSnapshot.getValue(String.class)).apply(new RequestOptions().circleCrop()).into(userImg);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
                 DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child(userType).child(auth.getUid());
                 dbref.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
@@ -160,20 +175,7 @@ public class AccountSetting extends AppCompatActivity {
             }
         });
 
-        db = FirebaseDatabase.getInstance().getReference().child(userType).child(auth.getUid()).child("userImgUrl");
-        db.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if(dataSnapshot.exists()){
-                    Glide.with(getApplicationContext()).load(dataSnapshot.getValue(String.class)).apply(new RequestOptions().circleCrop()).into(userImg);
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
         accName.setOnClickListener(new View.OnClickListener() {
             @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
             @Override
