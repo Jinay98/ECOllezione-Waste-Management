@@ -361,18 +361,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Zone zone = ds.getValue(Zone.class);
                     double latZone = Double.parseDouble(zone.getZoneLat().toString().trim());
                     double lonZone = Double.parseDouble(zone.getZoneLong().toString().trim());
-                    String zoneId = zone.getZoneID().toString().trim();
-                    String dangerType = zone.getZoneTitle().toString().trim();
+                    //String zoneId = zone.getZoneID().toString().trim();
+                    //String dangerType = zone.getZoneTitle().toString().trim();
 
                     int c=0;
 
-                    if(dangerType.equalsIgnoreCase("Potholes"))
+                    //if(dangerType.equalsIgnoreCase("Potholes"))
                         c=-65536;
-                    else if(dangerType.equalsIgnoreCase("live wires"))
+                    //else if(dangerType.equalsIgnoreCase("live wires"))
                         c=-16777216;
-                    else if(dangerType.equalsIgnoreCase("tree falling"))
+                    //else if(dangerType.equalsIgnoreCase("tree falling"))
                         c=-256;
-                    else
+                    //else
                         c=-16711936;
 
                     dangerous_area[i] = new LatLng(latZone, lonZone);
@@ -384,12 +384,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             .fillColor(0x220000ff)
                             .strokeWidth(5.0f));
 
-                    geoFire.setLocation(zoneId, new GeoLocation(latZone, lonZone), new GeoFire.CompletionListener() {
+                    /*geoFire.setLocation(zoneId, new GeoLocation(latZone, lonZone), new GeoFire.CompletionListener() {
                         @Override
                         public void onComplete(String key, DatabaseError error) {
 
                         }
-                    });
+                    });*/
                     i++;
                 }
                 geoQuery = geoFire.queryAtLocation(new GeoLocation(latti,longi),0.075);

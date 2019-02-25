@@ -1,62 +1,32 @@
 package com.example.android.wastemanagement.Models;
 
 public class Zone {
-    String zoneID , zoneTitle , zoneData , zoneSolution , zoneLat , zoneLong , zoneImage ;
-    long zoneStatusUpVote, zoneStatusDownVote, solvedCount;
+    String zoneCreator, zoneLat , zoneLong, category, city, cardinal;
+    String date, time;
+    Bandwidth bandwidth;
+
     public Zone() {
     }
 
-    public Zone(String zoneID, String zoneTitle, String zoneData, String zoneSolution, String zoneLat, String zoneLong, long zoneStatusUpVote, long zoneStatusDownVote,long solvedCount, String zoneImage) {
-        this.zoneID = zoneID;
-        this.zoneTitle = zoneTitle;
-        this.zoneData = zoneData;
-        this.zoneSolution = zoneSolution;
+    public Zone(String zoneCreator, String zoneLat, String zoneLong, String category, String city, String cardinal,
+                String date, String time, Bandwidth bandwidth) {
+        this.zoneCreator = zoneCreator;
         this.zoneLat = zoneLat;
         this.zoneLong = zoneLong;
-        this.zoneStatusUpVote = zoneStatusUpVote;
-        this.zoneStatusDownVote = zoneStatusDownVote;
-        this.solvedCount = solvedCount;
-        this.zoneImage = zoneImage;
+        this.category = category;
+        this.city = city;
+        this.cardinal = cardinal;
+        this.date = date;
+        this.time = time;
+        this.bandwidth = bandwidth;
     }
 
-    public long getSolvedCount() {
-        return solvedCount;
+    public String getZoneCreator() {
+        return zoneCreator;
     }
 
-    public void setSolvedCount(long solvedCount) {
-        this.solvedCount = solvedCount;
-    }
-
-    public String getZoneID() {
-        return zoneID;
-    }
-
-    public void setZoneID(String zoneID) {
-        this.zoneID = zoneID;
-    }
-
-    public String getZoneTitle() {
-        return zoneTitle;
-    }
-
-    public void setZoneTitle(String zoneTitle) {
-        this.zoneTitle = zoneTitle;
-    }
-
-    public String getZoneData() {
-        return zoneData;
-    }
-
-    public void setZoneData(String zoneData) {
-        this.zoneData = zoneData;
-    }
-
-    public String getZoneSolution() {
-        return zoneSolution;
-    }
-
-    public void setZoneSolution(String zoneSolution) {
-        this.zoneSolution = zoneSolution;
+    public void setZoneCreator(String zoneCreator) {
+        this.zoneCreator = zoneCreator;
     }
 
     public String getZoneLat() {
@@ -75,27 +45,51 @@ public class Zone {
         this.zoneLong = zoneLong;
     }
 
-    public long getZoneStatusUpVote() {
-        return zoneStatusUpVote;
+    public String getCategory() {
+        return category;
     }
 
-    public void setZoneStatusUpVote(long zoneStatusUpVote) {
-        this.zoneStatusUpVote = zoneStatusUpVote;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public long getZoneStatusDownVote() {
-        return zoneStatusDownVote;
+    public String getCity() {
+        return city;
     }
 
-    public void setZoneStatusDownVote(long zoneStatusDownVote) {
-        this.zoneStatusDownVote = zoneStatusDownVote;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public String getZoneImage() {
-        return zoneImage;
+    public String getCardinal() {
+        return cardinal;
     }
 
-    public void setZoneImage(String zoneImage) {
-        this.zoneImage = zoneImage;
+    public void setCardinal(String cardinal) {
+        this.cardinal = cardinal;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public Bandwidth getBandwidth() {
+        return bandwidth;
+    }
+
+    public void setBandwidth(Bandwidth bandwidth) {
+        this.bandwidth = bandwidth;
     }
 }
