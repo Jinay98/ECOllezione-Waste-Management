@@ -1,8 +1,13 @@
 package com.example.android.wastemanagement;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.DatePickerDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -11,8 +16,11 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -68,9 +76,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     public boolean closeview = false;
     private FirebaseAuth auth;
     private FirebaseUser userF;
-    private TextView userName, userEmail;
-    DatabaseReference dbuser, dbtoken;
+    private TextView userName, userEmail , userPoints;
+    DatabaseReference dbuser, dbtoken ,reff;
     ImageView userImg;
+    long userDonationStatus;
     String userType, userCity, userCardinal;
     private GoogleMap mMap;
     LocationManager locationManager;
@@ -87,14 +96,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     DatePickerDialog.OnDateSetListener fromDatepicker;
     Calendar myCalendar = Calendar.getInstance();
     String lat, lng, category;
-    LatLng dangerous_area[] = new LatLng[20];
+    LatLng dangerous_area[] = new LatLng[60];
     GeoQuery geoQuery;
     GeoFire geoFire;
+
+    double latitude , longitude;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
+        reff = FirebaseDatabase.getInstance().getReference("MyLocation");
+        geoFire = new GeoFire(reff);
 
         toolbar = findViewById(R.id.feature_req_toolbar);
         toolbar.setTitle("Home");
@@ -375,6 +389,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         navigationView.setItemIconTintList(null);
         userName = navigationView.getHeaderView(0).findViewById(R.id.head_name);
         userEmail = navigationView.getHeaderView(0).findViewById(R.id.head_email);
+        userPoints = navigationView.getHeaderView(0).findViewById(R.id.head_points);
         userImg = navigationView.getHeaderView(0).findViewById(R.id.user_image);
 
         Log.d("auth_id",auth.getUid());
@@ -391,8 +406,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             User user = dataSnapshot1.getValue(User.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getEmail());
+                            userPoints.setText("POINTS : "+ String.valueOf(user.getUserPoints()));
                             userCity = user.getUserCity();
                             userCardinal = user.getUserCardinality();
+                            userDonationStatus = user.getDonation_status();
+                            if(userDonationStatus==1){
+                                donate.setVisibility(View.GONE);
+                                donorQR.setVisibility(View.VISIBLE);
+                            }
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
@@ -406,6 +427,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             Volunteer user = dataSnapshot1.getValue(Volunteer.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getVolunteerEmail());
+                            userPoints.setVisibility(View.GONE);
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
@@ -413,12 +435,16 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                 //open applyAsVolunteer form
                                 Intent intent = new Intent(Home.this, ApplyAsVolunteer.class);
                                 startActivity(intent);
+                            }else{
+                                loadGeoFence();
                             }
+
                         }else if(userType.equals("ngo")){
                             donate.setVisibility(View.GONE);
                             Ngo user = dataSnapshot1.getValue(Ngo.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getNgoEmail());
+                            userPoints.setVisibility(View.GONE);
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
@@ -434,6 +460,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             Industry user = dataSnapshot1.getValue(Industry.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getIndustryEmail());
+                            userPoints.setVisibility(View.GONE);
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
@@ -458,9 +485,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
         loadFirstMap();
-        if(userType.equals("volunteer")){
-            loadGeoFence();
-        }
     }
 
     public void onBackPressed() {
@@ -497,7 +521,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     Zone zone = ds.getValue(Zone.class);
                     double latZone = Double.parseDouble(zone.getZoneLat().toString().trim());
                     double lonZone = Double.parseDouble(zone.getZoneLong().toString().trim());
-                    //String zoneId = zone.getZoneID().toString().trim();
+                    String zoneId = zone.getZoneCreator().toString().trim();
                     //String dangerType = zone.getZoneTitle().toString().trim();
 
                     int c=0;
@@ -511,15 +535,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             .fillColor(0x220000ff)
                             .strokeWidth(5.0f));
 
-                    /*geoFire.setLocation(zoneId, new GeoLocation(latZone, lonZone), new GeoFire.CompletionListener() {
+                    geoFire.setLocation(zoneId, new GeoLocation(latZone, lonZone), new GeoFire.CompletionListener() {
                         @Override
                         public void onComplete(String key, DatabaseError error) {
 
                         }
-                    });*/
+                    });
                     i++;
                 }
-                /*geoQuery = geoFire.queryAtLocation(new GeoLocation(latti,longi),0.075);
+                geoQuery = geoFire.queryAtLocation(new GeoLocation(latitude,longitude),0.075);
                 Log.d("Before_geofire", geoQuery.toString());
 
                 geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
@@ -551,7 +575,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                         Log.e("Error","check:"+error);
                     }
                 });
-                Log.d("After_geofire", geoQuery.toString());*/
+                Log.d("After_geofire", geoQuery.toString());
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -559,6 +583,42 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
     }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+    private void sendNotification(String title, String content) {
+
+        //Toast.makeText(this, "Hello from the other side", Toast.LENGTH_LONG).show();
+        NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int notificationId = 1;
+        String channelId = "channel-01";
+        String channelName = "Channel Name";
+        int importance = NotificationManager.IMPORTANCE_HIGH;
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel mChannel = new NotificationChannel(
+                    channelId, channelName, importance);
+            notificationManager.createNotificationChannel(mChannel);
+        }
+
+        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, channelId)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(content);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        Intent intent = new Intent(this , MapsActivity.class);
+        stackBuilder.addNextIntent(intent);
+        PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
+                0,
+                PendingIntent.FLAG_UPDATE_CURRENT
+        );
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        notificationManager.notify(notificationId, mBuilder.build());
+    }
+
     public void loadFirstMap(){
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -574,8 +634,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         locationListener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
+                latitude = location.getLatitude();
+                longitude = location.getLongitude();
                 lat = String.valueOf(latitude);
                 lng = String.valueOf(longitude);
                 //get the location name from latitude and longitude

@@ -127,7 +127,7 @@ public class Register extends AppCompatActivity {
 
                                     if(userType.equals("donor")){
                                         User user = new User(username, email,0, "no", "no", "no",
-                                                "no", 0, 0, token);
+                                                "no", 0, 0,0, token);
                                         DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("donor").child(auth.getUid());
                                         db.setValue(user);
                                     }else if(userType.equals("volunteer")){

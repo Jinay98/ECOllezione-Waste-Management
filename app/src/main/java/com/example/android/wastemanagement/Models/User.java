@@ -10,10 +10,12 @@ public class User {
     private String userCardinality;
     private long reg_status;
     private long userPoints;
+    private long donation_status;
     private String token;
 
     public User(String name, String email, long userContact, String userImgUrl,
-                String userAddress, String userCity, String userCardinality, long reg_status, long userPoints, String token) {
+                String userAddress, String userCity, String userCardinality, long reg_status,
+                long userPoints, long donation_status, String token) {
         this.name = name;
         this.email = email;
         this.userContact = userContact;
@@ -23,11 +25,20 @@ public class User {
         this.userCardinality = userCardinality;
         this.reg_status = reg_status;
         this.userPoints = userPoints;
+        this.donation_status = donation_status;
         this.token = token;
     }
 
     public User(){}
 
+
+    public long getDonation_status() {
+        return donation_status;
+    }
+
+    public void setDonation_status(long donation_status) {
+        this.donation_status = donation_status;
+    }
 
     public String getToken() {
         return token;

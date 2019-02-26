@@ -82,7 +82,7 @@ public class ApplyAsDonor extends AppCompatActivity {
                 }else{
                     db = FirebaseDatabase.getInstance().getReference().child("donor").child(auth.getUid());
                     db.setValue(new User(Dname,Demail,Long.valueOf(mobile.getText().toString().trim()),userImageUrl,
-                            Daddress, Dcity, Dcardinal, 1, 0, token));
+                            Daddress, Dcity, Dcardinal, 1, 0,0, token));
                     Toast.makeText(ApplyAsDonor.this, "Response Recorded", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(ApplyAsDonor.this, Home.class);
                     startActivity(intent);
