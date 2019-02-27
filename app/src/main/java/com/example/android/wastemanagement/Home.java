@@ -10,6 +10,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -26,21 +27,33 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.bumptech.glide.Glide;
 import com.example.android.wastemanagement.Models.Bandwidth;
 import com.example.android.wastemanagement.Models.Industry;
 import com.example.android.wastemanagement.Models.Ngo;
+import com.example.android.wastemanagement.Models.Tracker;
 import com.example.android.wastemanagement.Models.User;
 import com.example.android.wastemanagement.Models.Volunteer;
 import com.example.android.wastemanagement.Models.Zone;
@@ -56,6 +69,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -63,9 +77,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.maps.android.PolyUtil;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
@@ -86,8 +106,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     Marker marker;
     LocationListener locationListener;
-    Button donate, submitDonation, donorQR;
-    LinearLayout donationView;
+    Button donate, submitDonation, donorQR, ngoQR, showRoute, volunteerAccept, volunteerReject, volunteerScanQR;
+    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan;
     ImageView aclothes,agrains,apacked,astationary,afurniture,aelectronic;
     ImageView mclothes,mgrains,mpacked,mstationary,mfurniture,melectronic;
     TextView qclothes,qgrains,qpacked,qstationary,qfurniture,qelectronic;
@@ -99,6 +119,19 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     LatLng dangerous_area[] = new LatLng[60];
     GeoQuery geoQuery;
     GeoFire geoFire;
+    List<String> inZoneOf = new ArrayList<>();
+    List<String> donorSpinnerList = new ArrayList<>();
+    List<Long> donorSpinnerAcceptStatus = new ArrayList<>();
+    List<String> donorLati = new ArrayList<>();
+    List<String> donorLongi = new ArrayList<>();
+    List<String> volunteerLati = new ArrayList<>();
+    List<String> volunteerLongi = new ArrayList<>();
+    List<String> donorAuthKey = new ArrayList<>();
+    String donorName, donorImg, donorLat, donorLong, volunteerName, volunteerImg, volunteerLat, volunteerLong;
+    String date, time, ngoAuthKey, username, userImgUrl, donorAuth;
+    LatLng source, dest;
+    Bandwidth toCollect;
+    Spinner donorSpinner;
 
     double latitude , longitude;
 
@@ -121,6 +154,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         submitDonation = findViewById(R.id.submitDonation);
         donationView = findViewById(R.id.donation_view);
         donorQR = findViewById(R.id.donorQRgenr);
+        ngoQR = findViewById(R.id.ngoQRgenr);
+        volunteerView = findViewById(R.id.volunteer_view);
+        donorSpinner = findViewById(R.id.donorList_spinner);
+        volunteer_acc_rej = findViewById(R.id.volunteer_acc_rej);
+        volunteer_route_scan = findViewById(R.id.volunteer_route_scan);
+        volunteerScanQR = findViewById(R.id.volunteer_scanQR);
+        showRoute = findViewById(R.id.makeRoute);
+        volunteerAccept = findViewById(R.id.volunteer_accept);
+        volunteerReject = findViewById(R.id.volunteer_reject);
         aclothes = findViewById(R.id.add_clothes);agrains = findViewById(R.id.add_grains);
         apacked = findViewById(R.id.add_packed);astationary = findViewById(R.id.add_stationary);
         afurniture = findViewById(R.id.add_furniture);aelectronic = findViewById(R.id.add_electronic);
@@ -309,12 +351,60 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             fromDate.getText().toString(), fromTime.getText().toString(),
                             new Bandwidth(vclothes,vpacked,vgrains,vstationary,0,vfurniture,velectronic));
                     DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("Zones");
-                    String ZoneKey = dbref.push().getKey();
-                    dbref.child(ZoneKey).setValue(zone);
+                    dbref.child(auth.getUid()).setValue(zone);
                     Toast.makeText(Home.this, "Items added successfully", Toast.LENGTH_SHORT).show();
                     donationView.setVisibility(View.GONE);
                     donorQR.setVisibility(View.VISIBLE);
                 }
+            }
+        });
+
+        volunteerAccept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseReference db = FirebaseDatabase.getInstance().getReference()
+                        .child("tracker").child(auth.getUid()).child(donorAuth).child("accept_status");
+                db.setValue((long)1);
+                DatabaseReference dbZone = FirebaseDatabase.getInstance().getReference()
+                        .child("Zones").child(donorAuth);
+                dbZone.getRef().removeValue();
+                DatabaseReference dbMyloc = FirebaseDatabase.getInstance().getReference()
+                        .child("MyLocation").child(donorAuth);
+                dbMyloc.getRef().removeValue();
+                volunteer_acc_rej.setVisibility(View.GONE);
+                volunteer_route_scan.setVisibility(View.VISIBLE);
+            }
+        });
+
+        donorSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(Home.this, donorSpinnerList.get(i)+" : ", Toast.LENGTH_SHORT).show();
+                if(donorSpinnerAcceptStatus.get(i)==0){
+                    volunteer_acc_rej.setVisibility(View.VISIBLE);
+                    volunteer_route_scan.setVisibility(View.GONE);
+                }else{
+                    volunteer_acc_rej.setVisibility(View.GONE);
+                    volunteer_route_scan.setVisibility(View.VISIBLE);
+                }
+                source = new LatLng(Double.valueOf(volunteerLati.get(i)), Double.valueOf(volunteerLongi.get(i)));
+                dest = new LatLng(Double.valueOf(donorLati.get(i)), Double.valueOf(donorLongi.get(i)));
+                donorAuth = donorAuthKey.get(i);
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
+        showRoute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(Home.this,"Showing the best route!",Toast.LENGTH_SHORT).show();
+                requestDirection(new LatLng(19.0249641,72.8515969),dest,mMap);
             }
         });
 
@@ -425,19 +515,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                         }else if(userType.equals("volunteer")){
                             donate.setVisibility(View.GONE);
                             Volunteer user = dataSnapshot1.getValue(Volunteer.class);
+                            username = user.getName();
+                            userImgUrl = user.getUserImgUrl();
                             userName.setText(user.getName());
                             userEmail.setText(user.getVolunteerEmail());
+                            ngoAuthKey = user.getNgoAuthkey();
                             userPoints.setVisibility(View.GONE);
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
-                            if(user.getReg_status()==0){
+                            /*if(user.getReg_status()==0){
                                 //open applyAsVolunteer form
                                 Intent intent = new Intent(Home.this, ApplyAsVolunteer.class);
                                 startActivity(intent);
-                            }else{
+                            }else{*/
                                 loadGeoFence();
-                            }
+                            //}
+                            donate.setVisibility(View.GONE);
+                            volunteerView.setVisibility(View.VISIBLE);
 
                         }else if(userType.equals("ngo")){
                             donate.setVisibility(View.GONE);
@@ -455,6 +550,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             }else{
                                 navigationView.getMenu().findItem(R.id.approve_volunteers).setVisible(true);
                             }
+                            donate.setVisibility(View.GONE);
+                            ngoQR.setVisibility(View.VISIBLE);
                         }else if(userType.equals("industry")){
                             donate.setVisibility(View.GONE);
                             Industry user = dataSnapshot1.getValue(Industry.class);
@@ -469,6 +566,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             }else{
                                 navigationView.getMenu().findItem(R.id.approve_volunteers).setVisible(true);
                             }
+                            donate.setVisibility(View.GONE);
+                            ngoQR.setVisibility(View.VISIBLE);
                         }
                     }
 
@@ -485,6 +584,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
         loadFirstMap();
+        removeUnwantedDB();
+
     }
 
     public void onBackPressed() {
@@ -506,6 +607,120 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
     public void closeview(Boolean value) {
         closeview = value;
+    }
+
+    public void removeUnwantedDB(){
+        DatabaseReference dbref = FirebaseDatabase.getInstance().getReference()
+                .child("tracker").child(auth.getUid());
+        dbref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    String key = snapshot.getKey();
+                    long temp = snapshot.child("accept_status").getValue(Long.class);
+                    if(temp == 0){
+                        snapshot.getRef().removeValue();
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void loadSpinner(){
+        DatabaseReference dbSPinner = FirebaseDatabase.getInstance().getReference()
+                .child("tracker").child(auth.getUid());
+        dbSPinner.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                    Log.d("loadSpinner","inside");
+                    Log.d("loadSpinner",snapshot.child("donorName").getValue(String.class));
+                    if(!donorSpinnerList.contains(snapshot.child("donorName").getValue(String.class))){
+                        donorAuthKey.add(snapshot.getKey());
+                        donorSpinnerList.add(snapshot.child("donorName").getValue(String.class));
+                        donorSpinnerAcceptStatus.add(snapshot.child("accept_status").getValue(Long.class));
+                        donorLati.add(snapshot.child("donorLat").getValue(String.class));
+                        donorLongi.add(snapshot.child("donorLong").getValue(String.class));
+                        volunteerLati.add(snapshot.child("volunteerLat").getValue(String.class));
+                        volunteerLongi.add(snapshot.child("volunteerLong").getValue(String.class));
+                    }
+                }
+                ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                        Home.this, android.R.layout.simple_spinner_item, donorSpinnerList);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                //spinner.setSelection(0,true);
+                donorSpinner.setAdapter(adapter);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    public void requestDirection(LatLng source, LatLng des, final GoogleMap mMap)
+    {
+
+
+        String url="https://maps.googleapis.com/maps/api/directions/json?origin="+source.latitude+","+source.longitude+"" +
+                "&destination="+des.latitude+","+des.longitude+"&key="+"";
+        System.out.println("The url is ="+url);
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+
+// Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        System.out.println("The response is ="+response);
+                        try{
+                            JSONObject jsonObject=new JSONObject(response);
+                            JSONArray jsonArray = jsonObject.getJSONArray("routes").getJSONObject(0).getJSONArray("legs").getJSONObject(0).getJSONArray("steps");
+                            int count=jsonArray.length();
+                            String[] polyline_array=new String[count];
+                            JSONObject jsonObject2;
+
+                            for(int i=0;i<count;i++)
+                            {
+                                jsonObject2=jsonArray.getJSONObject(i);
+                                String polygone=jsonObject2.getJSONObject("polyline").getString("points");
+                                polyline_array[i]=polygone;
+                            }
+                            int count2=polyline_array.length;
+
+                            for(int i=0;i<count2;i++)
+                            {
+                                PolylineOptions options2=new PolylineOptions();
+                                options2.color(Color.BLUE);
+                                options2.width(10);
+                                options2.addAll(PolyUtil.decode(polyline_array[i]));
+                                mMap.addPolyline(options2);
+                            }
+                        }catch (JSONException e)
+                        {
+                            e.printStackTrace();
+                        }
+
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println("The error is "+error);
+            }
+        });
+
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
+
     }
 
     public void loadGeoFence(){
@@ -548,9 +763,53 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
                 geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
 
-
                     public void onKeyEntered(String key, GeoLocation location) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+                            inZoneOf.add(key);
+                            Log.d("inZoneof",String.valueOf(inZoneOf));
+
+                            //Add data to DB for tracking and Accept/Reject
+                            for(String str : inZoneOf){
+                                final DatabaseReference dbref = FirebaseDatabase.getInstance().getReference()
+                                        .child("tracker").child(auth.getUid()).child(str);
+                                DatabaseReference db = FirebaseDatabase.getInstance().getReference()
+                                        .child("donor").child(str);
+                                final DatabaseReference dbZone = FirebaseDatabase.getInstance().getReference()
+                                        .child("Zones").child(str);
+                                db.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        User user = dataSnapshot.getValue(User.class);
+                                        donorName = user.getName();
+                                        donorImg = user.getUserImgUrl();
+                                        dbZone.addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                Zone zone = dataSnapshot.getValue(Zone.class);
+                                                donorLat = zone.getZoneLat();
+                                                donorLong = zone.getZoneLong();
+                                                date = zone.getDate();
+                                                time = zone.getTime();
+                                                toCollect = zone.getBandwidth();
+                                                Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
+                                                        userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,0,toCollect,ngoAuthKey);
+                                                dbref.setValue(tracker);
+                                                loadSpinner();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
+
+                                            }
+                                        });
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
                             sendNotification("DangerZone -"+key,String.format("%s Entered into the ZoneArea",key));
                         }
                     }
