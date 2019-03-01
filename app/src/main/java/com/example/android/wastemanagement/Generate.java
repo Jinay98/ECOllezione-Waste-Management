@@ -49,7 +49,7 @@ public class Generate extends AppCompatActivity {
         Bundle bd = getIntent().getExtras();
 
         if(bd!=null){
-            string=bd.getString("Email");
+            string=bd.getString("authid");
             try {
                 bitmap = TextToImageEncode(string);
                 iv.setImageBitmap(bitmap);

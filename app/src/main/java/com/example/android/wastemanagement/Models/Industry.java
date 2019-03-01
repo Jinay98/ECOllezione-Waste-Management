@@ -11,14 +11,14 @@ public class Industry {
     private String industryCity;
     private String industryCardinality;
     private long reg_status;
-    private String recycleType;
+    private HashMap<String,Long> recycleType;
     private Volunteer toApprove;
     private HashMap<String, Boolean> approvedList;
     private String industryRegNumber;
     private String officalImgUrl;
 
     public Industry(String name, String industryEmail, long industryContact, String userImgUrl, String industryAddress,
-                    String industryCity, String industryCardinality, long reg_status, String recycleType, Volunteer toApprove,
+                    String industryCity, String industryCardinality, long reg_status, HashMap<String,Long> recycleType, Volunteer toApprove,
                     HashMap<String, Boolean> approvedList, String industryRegNumber, String officalImgUrl) {
         this.name = name;
         this.industryEmail = industryEmail;
@@ -101,11 +101,11 @@ public class Industry {
         this.reg_status = reg_status;
     }
 
-    public String getRecycleType() {
+    public HashMap<String,Long> getRecycleType() {
         return recycleType;
     }
 
-    public void setRecycleType(String recycleType) {
+    public void setRecycleType(HashMap<String,Long> recycleType) {
         this.recycleType = recycleType;
     }
 

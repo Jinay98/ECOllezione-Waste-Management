@@ -130,8 +130,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     String donorName, donorImg, donorLat, donorLong, volunteerName, volunteerImg, volunteerLat, volunteerLong;
     String date, time, ngoAuthKey, username, userImgUrl, donorAuth;
     LatLng source, dest;
-    Bandwidth toCollect;
+    Bandwidth toCollect, cmpBandwidth;
     Spinner donorSpinner;
+    Boolean alreadyZoned = false;
 
     double latitude , longitude;
 
@@ -524,15 +525,35 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
-                            /*if(user.getReg_status()==0){
+                            if(user.getReg_status()==0){
                                 //open applyAsVolunteer form
                                 Intent intent = new Intent(Home.this, ApplyAsVolunteer.class);
                                 startActivity(intent);
-                            }else{*/
+                            }else if(user.getAccept_status()==1){
                                 loadGeoFence();
-                            //}
+                            }
                             donate.setVisibility(View.GONE);
                             volunteerView.setVisibility(View.VISIBLE);
+                            final DatabaseReference dbref = FirebaseDatabase.getInstance().getReference()
+                                    .child("tracker").child(auth.getUid());
+                            dbref.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                                        if(snapshot.child("accept_status").getValue(Long.class)==0){
+                                            alreadyZoned = true;
+                                        }
+                                    }
+                                    if(alreadyZoned == false){
+                                        loadSpinner();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
 
                         }else if(userType.equals("ngo")){
                             donate.setVisibility(View.GONE);
@@ -763,54 +784,83 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
                 geoQuery.addGeoQueryEventListener(new GeoQueryEventListener() {
 
-                    public void onKeyEntered(String key, GeoLocation location) {
+                    public void onKeyEntered(final String key, GeoLocation location) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                             inZoneOf.add(key);
                             Log.d("inZoneof",String.valueOf(inZoneOf));
+                            if(userType.equals("volunteer")){
+                                for(final String str : inZoneOf){
+                                    final DatabaseReference dbref = FirebaseDatabase.getInstance().getReference()
+                                            .child("tracker").child(auth.getUid()).child(str);
+                                    DatabaseReference db = FirebaseDatabase.getInstance().getReference()
+                                            .child("donor").child(str);
+                                    final DatabaseReference dbZone = FirebaseDatabase.getInstance().getReference()
+                                            .child("Zones").child(str);
+                                    db.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            final User user = dataSnapshot.getValue(User.class);
+                                            dbZone.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    final Zone zone = dataSnapshot.getValue(Zone.class);
+                                                    donorLat = zone.getZoneLat();
+                                                    donorLong = zone.getZoneLong();
+                                                    date = zone.getDate();
+                                                    time = zone.getTime();
+                                                    toCollect = zone.getBandwidth();
+                                                    donorName = user.getName();
+                                                    donorImg = user.getUserImgUrl();
+                                                    final Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
+                                                            userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,0,toCollect,ngoAuthKey);
+                                                    dbref.setValue(tracker);
+                                                    loadSpinner();
+                                                    /*DatabaseReference dbbw = FirebaseDatabase.getInstance().getReference()
+                                                            .child("ngo").child(ngoAuthKey).child("bandwidth");
+                                                    dbbw.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                                            cmpBandwidth = dataSnapshot.getValue(Bandwidth.class);
+                                                            Log.d("tracker",String.valueOf(cmpBandwidth.getFurniture())
+                                                                    +":"+String.valueOf(zone.getBandwidth().getFurniture()));
+                                                            if(cmpBandwidth.getClothes()>=toCollect.getClothes() &&
+                                                                    cmpBandwidth.getPackedFood()>=toCollect.getPackedFood() &&
+                                                                    cmpBandwidth.getGrains()>=toCollect.getGrains() &&
+                                                                    cmpBandwidth.getFurniture()>=toCollect.getFurniture() &&
+                                                                    cmpBandwidth.getElectronics()>=toCollect.getElectronics() &&
+                                                                    cmpBandwidth.getStationary()>=toCollect.getStationary()){
+                                                                Log.d("tracker","inside tracker");
+                                                                dbref.setValue(tracker);
+                                                                loadSpinner();
+                                                                sendNotification("DangerZone -"+key,String.format("%s Entered into the ZoneArea",key));
+                                                            }
+                                                        }
 
-                            //Add data to DB for tracking and Accept/Reject
-                            for(String str : inZoneOf){
-                                final DatabaseReference dbref = FirebaseDatabase.getInstance().getReference()
-                                        .child("tracker").child(auth.getUid()).child(str);
-                                DatabaseReference db = FirebaseDatabase.getInstance().getReference()
-                                        .child("donor").child(str);
-                                final DatabaseReference dbZone = FirebaseDatabase.getInstance().getReference()
-                                        .child("Zones").child(str);
-                                db.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        User user = dataSnapshot.getValue(User.class);
-                                        donorName = user.getName();
-                                        donorImg = user.getUserImgUrl();
-                                        dbZone.addListenerForSingleValueEvent(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                Zone zone = dataSnapshot.getValue(Zone.class);
-                                                donorLat = zone.getZoneLat();
-                                                donorLong = zone.getZoneLong();
-                                                date = zone.getDate();
-                                                time = zone.getTime();
-                                                toCollect = zone.getBandwidth();
-                                                Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
-                                                        userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,0,toCollect,ngoAuthKey);
-                                                dbref.setValue(tracker);
-                                                loadSpinner();
-                                            }
+                                                        @Override
+                                                        public void onCancelled(DatabaseError databaseError) {
 
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
+                                                        }
+                                                    });*/
+                                                }
 
-                                            }
-                                        });
-                                    }
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                                }
+                                            });
 
-                                    }
-                                });
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
                             }
+                            //Add data to DB for tracking and Accept/Reject
                             sendNotification("DangerZone -"+key,String.format("%s Entered into the ZoneArea",key));
+
                         }
                     }
 

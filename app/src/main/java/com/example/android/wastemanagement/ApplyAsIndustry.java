@@ -44,7 +44,7 @@ import java.util.HashMap;
 
 public class ApplyAsIndustry extends AppCompatActivity {
 
-    EditText name,email,mobile_no,address, reg_no, city, cardinal;
+    EditText name,email,mobile_no,address, reg_no, city, cardinal, bandwidth;
     Button submit, submitstep1;
     LinearLayout clicksubmit,step1,step2, filterLayout;
     TextView afterText, filterName;
@@ -58,7 +58,7 @@ public class ApplyAsIndustry extends AppCompatActivity {
     User user;
     String radioSelected, userImageUrl;
     String Nname, Nemail, Naddress, Ncity, Ncardinal, Nregno;
-    Long Nmobile;
+    Long Nmobile, Nbandwidth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +79,8 @@ public class ApplyAsIndustry extends AppCompatActivity {
         step2 = findViewById(R.id.step2);
         filterLayout = findViewById(R.id.filterLayout);
         filterName = findViewById(R.id.filterName);
+        bandwidth = findViewById(R.id.industryBandwidth);
+
 
         dialog = new ProgressDialog(ApplyAsIndustry.this);
         dialog.setMessage("Updating please wait...");
@@ -190,9 +192,11 @@ public class ApplyAsIndustry extends AppCompatActivity {
                     Toast.makeText(ApplyAsIndustry.this, "Upload official NGO document", Toast.LENGTH_SHORT).show();
                 }else if(filterName.getText().toString().equals("Select Type")){
                     Toast.makeText(ApplyAsIndustry.this, "Select type first", Toast.LENGTH_SHORT).show();
+                }else if(TextUtils.isEmpty(bandwidth.getText().toString().trim())){
+                    Toast.makeText(ApplyAsIndustry.this, "Enter Bandwidth", Toast.LENGTH_SHORT).show();
                 }else{
                     Industry industry = new Industry(Nname, Nemail, Nmobile, userImageUrl, Naddress, Ncity, Ncardinal, 1,
-                            filterName.getText().toString(),
+                            new HashMap<String, Long>(){{put(filterName.getText().toString(),Long.valueOf(bandwidth.getText().toString())); }} ,
                             new Volunteer(null,null,0,null,
                                     null,0,0,null,null),
                             new HashMap<String, Boolean>(), Nregno, String.valueOf(path));

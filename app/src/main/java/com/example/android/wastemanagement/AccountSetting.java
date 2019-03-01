@@ -220,14 +220,14 @@ public class AccountSetting extends AppCompatActivity {
             }
         });
 
-        /*btnQR.setOnClickListener(new View.OnClickListener() {
+        btnQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent obj = new Intent(AccountSetting.this , QR.class);
-                obj.putExtra("Email", accEmail.getText().toString().trim());
+                Intent obj = new Intent(AccountSetting.this , Generate.class);
+                obj.putExtra("authid", auth.getUid());
                 startActivity(obj);
             }
-        });*/
+        });
 
         userImg.setOnClickListener(new View.OnClickListener() {
             @Override

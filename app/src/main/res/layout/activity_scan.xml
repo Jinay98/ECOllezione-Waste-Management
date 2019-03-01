@@ -7,15 +7,18 @@
     tools:context=".Scan">
 
     <Button
+        android:layout_marginTop="100dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btn"
+        android:layout_gravity="center"
         android:text="Scan Barcode or QR code" />
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/tvresult"
         android:textColor="#000"
+        android:gravity="center_horizontal"
         android:layout_marginTop="10dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Result will be here"/>
