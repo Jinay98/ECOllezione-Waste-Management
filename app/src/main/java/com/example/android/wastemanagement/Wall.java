@@ -1,8 +1,15 @@
 package com.example.android.wastemanagement;
 
+import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +19,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -21,20 +29,27 @@ import com.example.android.wastemanagement.Models.Post;
 import com.example.android.wastemanagement.Models.User;
 import com.example.android.wastemanagement.Models.Volunteer;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class Wall extends AppCompatActivity {
 
     EditText chatText;
-    ImageView send, mic;
+    ImageView send, mic, attach;
+    TextView isAttached;
     View view;
     private final int REQ_CODE_SPEECH_INPUT = 100;
     RecyclerView recyclerView;
@@ -42,6 +57,11 @@ public class Wall extends AppCompatActivity {
     String name, imgUrl, userType;
     FirebaseRecyclerAdapter<Post, PostAdapterViewHolder> adapter;
     android.support.v7.widget.Toolbar toolbar;
+    private static final int GALLERY_INTETN=2;
+    public ProgressDialog dialog;
+    private StorageReference mStorage;
+    Bitmap compressed;
+    Uri path;
 
     FirebaseAuth auth;
     @Override
@@ -58,10 +78,16 @@ public class Wall extends AppCompatActivity {
         chatText = findViewById(R.id.create_post_edittext);
         send = findViewById(R.id.create_post_upload);
         mic = findViewById(R.id.create_post_stt);
+        attach = findViewById(R.id.create_post_attachment);
+        isAttached = findViewById(R.id.isAttached);
         layoutManager = new LinearLayoutManager(this);
         layoutManager.setStackFromEnd(true);
         recyclerView = findViewById(R.id.trainChats);
 
+        dialog = new ProgressDialog(Wall.this);
+        dialog.setMessage("Updating please wait...");
+
+        mStorage = FirebaseStorage.getInstance().getReference();
         auth = FirebaseAuth.getInstance();
 
         Bundle bundle = getIntent().getExtras();
@@ -80,6 +106,22 @@ public class Wall extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 promptSpeechInput();
+            }
+        });
+
+        attach.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (ActivityCompat.checkSelfPermission(Wall.this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    ActivityCompat.requestPermissions(Wall.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, 1);
+
+                } else {
+                    Intent mintetnt = new Intent(Intent.ACTION_PICK);
+                    mintetnt.setType("image/*");
+                    startActivityForResult(mintetnt, GALLERY_INTETN);
+                }
             }
         });
 
@@ -117,11 +159,22 @@ public class Wall extends AppCompatActivity {
                                         name = user.getName();
                                         imgUrl = user.getUserImgUrl();
                                     }
-                                    Post post = new Post(name,imgUrl,chatText.getText().toString(),"no",auth.getUid());
-                                    DatabaseReference db = FirebaseDatabase.getInstance().getReference()
-                                            .child("wall").push();
-                                    String key = db.getKey().toString();
-                                    db.setValue(post);
+                                    if(isAttached.getVisibility()==View.VISIBLE){
+                                        Post post = new Post(name,imgUrl,chatText.getText().toString(),String.valueOf(path),auth.getUid());
+                                        DatabaseReference db = FirebaseDatabase.getInstance().getReference()
+                                                .child("wall").push();
+                                        String key = db.getKey().toString();
+                                        db.setValue(post);
+                                        isAttached.setVisibility(View.GONE);
+                                    }else{
+                                        Post post = new Post(name,imgUrl,chatText.getText().toString(),"no",auth.getUid());
+                                        DatabaseReference db = FirebaseDatabase.getInstance().getReference()
+                                                .child("wall").push();
+                                        String key = db.getKey().toString();
+                                        db.setValue(post);
+                                        isAttached.setVisibility(View.GONE);
+                                    }
+
                                     /*DatabaseReference dblikeCount = FirebaseDatabase.getInstance().getReference()
                                             .child("likeCount").child(key);
                                     dblikeCount.setValue((int)0);*/
@@ -164,19 +217,43 @@ public class Wall extends AppCompatActivity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
 
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
+        if (requestCode == REQ_CODE_SPEECH_INPUT && resultCode == RESULT_OK && null != data) {
+            ArrayList<String> result = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                chatText.setText(result.get(0));
+        }
+        if (requestCode == GALLERY_INTETN && resultCode==RESULT_OK) {
+            dialog.setMessage("Uploading");
+            dialog.show();
+            Uri uri= data.getData();
 
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    chatText.setText(result.get(0));
-                }
-                break;
+            StorageReference filepath= mStorage.child("wall_pic").child(uri.getLastPathSegment());
+            try
+            {
+                compressed = MediaStore.Images.Media.getBitmap(Wall.this.getContentResolver(), uri);
             }
-
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            compressed.compress(Bitmap.CompressFormat.JPEG, 30, baos);
+            byte[] cimg = baos.toByteArray();
+            filepath.putBytes(cimg).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+                {
+                    path = taskSnapshot.getDownloadUrl();
+                    //accountref = FirebaseDatabase.getInstance().getReference().child("user_details").child(auth.getUid());
+                    //accountref.child("userImgUrl").setValue(String.valueOf(path));
+                    Toast.makeText(Wall.this, "Document uploaded", Toast.LENGTH_LONG).show();
+                    //finish();
+                    //startActivity(getIntent());
+                    isAttached.setVisibility(View.VISIBLE);
+                    attach.setVisibility(View.GONE);
+                    dialog.dismiss();
+                }
+            });
         }
     }
     private void loaddata(){
@@ -204,9 +281,7 @@ public class Wall extends AppCompatActivity {
                 if(!post.getUserImgUrl().equals("no")){
                     postAdapterViewHolder.setUserImage(post.getUserImgUrl());
                 }
-                if(!post.getPostImgUrl().equals("no")) {
-                    postAdapterViewHolder.setPostImg(post.getPostImgUrl());
-                }
+                postAdapterViewHolder.setPostImg(post.getPostImgUrl());
             }
         };
         recyclerView.setAdapter(adapter);

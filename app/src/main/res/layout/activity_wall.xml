@@ -50,12 +50,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:background="#C0C0C0"
+        android:background="@color/white"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="1.0">
+
+        <TextView
+            android:id="@+id/isAttached"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
+            android:text="Image has been Added Press Submit to Continue"
+            android:textColor="@color/green"
+            android:textSize="16sp"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:layout_margin="5dp"
@@ -86,6 +97,15 @@
                 android:maxLines="6"
                 android:paddingLeft="5dp"
                 android:textSize="8pt" />
+
+            <ImageView
+                android:id="@+id/create_post_attachment"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_gravity="center"
+                android:padding="5dp"
+                app:srcCompat="@drawable/ic_attach_file_black_24dp" />
+
 
             <ImageView
                 android:id="@+id/create_post_stt"

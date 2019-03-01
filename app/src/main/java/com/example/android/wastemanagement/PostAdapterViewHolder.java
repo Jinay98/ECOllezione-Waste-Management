@@ -38,6 +38,10 @@ public class PostAdapterViewHolder extends RecyclerView.ViewHolder {
         Glide.with(context).load(image).into(userImg);
     }
     public void setPostImg(String postimage){
-        Glide.with(context).load(postimage).into(postImg);
+        if(postimage.equals("no")){
+            postImg.setVisibility(View.GONE);
+        }else{
+            Glide.with(context).load(postimage).into(postImg);
+        }
     }
 }

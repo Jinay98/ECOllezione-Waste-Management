@@ -766,7 +766,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
                     mMap.addCircle(new CircleOptions()
                             .center(dangerous_area[i])
-                            .radius(75)
+                            .radius(2000)
                             .strokeColor(c)
                             .fillColor(0x220000ff)
                             .strokeWidth(5.0f));

@@ -25,7 +25,6 @@
                     android:id="@+id/profileImg"
                     android:layout_width="50dp"
                     android:layout_height="50dp"
-                    android:layout_gravity="center_vertical"
                     android:src="@drawable/profile_pic" />
 
                 <LinearLayout
@@ -57,10 +56,9 @@
 
                     <ImageView
                         android:id="@+id/postImg"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/profile_pic"
-                        android:visibility="gone"/>
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:scaleType="centerCrop"/>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
