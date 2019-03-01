@@ -335,6 +335,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 category = "ngo";
             }
         });
+        volunteerScanQR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Home.this,Scan.class));
+            }
+        });
         submitDonation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -960,12 +966,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                         marker.remove();
                         marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result));
                         mMap.setMaxZoomPreference(20);
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
                     }
                     else{
                         marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result));
                         mMap.setMaxZoomPreference(20);
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
                     }
 
 
