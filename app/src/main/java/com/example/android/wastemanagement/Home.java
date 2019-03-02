@@ -36,8 +36,10 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupMenu;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -96,7 +98,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     public boolean closeview = false;
     private FirebaseAuth auth;
     private FirebaseUser userF;
-    private TextView userName, userEmail , userPoints;
+    private TextView userName, userEmail , userPoints, filterName;
+    EditText bandwidth;
     DatabaseReference dbuser, dbtoken ,reff;
     ImageView userImg;
     long userDonationStatus;
@@ -106,14 +109,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     Marker marker;
     LocationListener locationListener;
-    Button donate, sell, submitDonation, donorQR, ngoQR, showRoute, volunteerAccept, volunteerReject, volunteerScanQR;
-    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan, donate_sell, sellView;
+    Button donate, sell, submitDonation, submitSell, donorQR, ngoQR, showRoute, volunteerAccept, volunteerReject, volunteerScanQR;
+    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan, donate_sell, sellView, dropDown;
     ImageView aclothes,agrains,apacked,astationary,afurniture,aelectronic;
     ImageView mclothes,mgrains,mpacked,mstationary,mfurniture,melectronic;
     TextView qclothes,qgrains,qpacked,qstationary,qfurniture,qelectronic;
-    TextView fromDate,fromTime;
-    ImageView cancel;
-    DatePickerDialog.OnDateSetListener fromDatepicker;
+    TextView fromDate,fromTime, fromDateSell, fromTimeSell;
+    ImageView cancel, cancelSell;
+    DatePickerDialog.OnDateSetListener fromDatepicker, fromDatepickerSell;
     Calendar myCalendar = Calendar.getInstance();
     String lat, lng, category;
     LatLng dangerous_area[] = new LatLng[60];
@@ -128,7 +131,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     List<String> volunteerLongi = new ArrayList<>();
     List<String> donorAuthKey = new ArrayList<>();
     String donorName, donorImg, donorLat, donorLong, volunteerName, volunteerImg, volunteerLat, volunteerLong;
-    String date, time, ngoAuthKey, username, userImgUrl, donorAuth;
+    String date, time, ngoAuthKey, username, userImgUrl, donorAuth, type;
     LatLng source, dest;
     Bandwidth toCollect, cmpBandwidth;
     Spinner donorSpinner;
@@ -155,7 +158,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         sell = findViewById(R.id.sell);
         donate_sell = findViewById(R.id.donate_sell);
         sellView = findViewById(R.id.sell_view);
+        dropDown = findViewById(R.id.dropDown);
+        filterName = findViewById(R.id.filterName);
         submitDonation = findViewById(R.id.submitDonation);
+        submitSell = findViewById(R.id.submitSell);
         donationView = findViewById(R.id.donation_view);
         donorQR = findViewById(R.id.donorQRgenr);
         ngoQR = findViewById(R.id.ngoQRgenr);
@@ -179,7 +185,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
         fromDate = findViewById(R.id.fromDate);
         fromTime = findViewById(R.id.fromTime);
+        fromDateSell = findViewById(R.id.fromDateSell);
+        fromTimeSell = findViewById(R.id.fromTimeSell);
         cancel = findViewById(R.id.create_post_cancel);
+        cancelSell = findViewById(R.id.create_post_cancel_sell);
 
         final DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -287,7 +296,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
             }
         });
-
         fromDatepicker = new DatePickerDialog.OnDateSetListener() {
 
             @Override
@@ -299,6 +307,32 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 String myFormat = "MM/dd/yy"; //In which you need put here
                 SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
                 fromDate.setText(sdf.format(myCalendar.getTime()));
+            }
+
+        };
+
+
+        fromDateSell.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new DatePickerDialog(Home.this,fromDatepickerSell, myCalendar
+                        .get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
+                        myCalendar.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+
+        fromDatepickerSell = new DatePickerDialog.OnDateSetListener() {
+
+            @Override
+            public void onDateSet(DatePicker view, int year, int monthOfYear,
+                                  int dayOfMonth) {
+                myCalendar.set(Calendar.YEAR, year);
+                myCalendar.set(Calendar.MONTH, monthOfYear);
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                String myFormat = "MM/dd/yy"; //In which you need put here
+                SimpleDateFormat sdf = new SimpleDateFormat(myFormat, Locale.US);
+                fromDateSell.setText(sdf.format(myCalendar.getTime()));
             }
 
         };
@@ -323,11 +357,38 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
             }
         });
+
+        fromTimeSell.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Calendar mcurrentTime = Calendar.getInstance();
+                int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                int minute = mcurrentTime.get(Calendar.MINUTE);
+
+                TimePickerDialog mTimePicker;
+                mTimePicker = new TimePickerDialog(Home.this, new TimePickerDialog.OnTimeSetListener() {
+                    @Override
+                    public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute) {
+                        fromTimeSell.setText(String.format("%02d:%02d", selectedHour, selectedMinute));
+                    }
+                }, hour, minute, true);
+                mTimePicker.setTitle("Select Time");
+                mTimePicker.show();
+
+            }
+        });
         cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                donationView.setVisibility(View.GONE);
                donate_sell.setVisibility(View.VISIBLE);
+            }
+        });
+        cancelSell.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sellView.setVisibility(View.GONE);
+                donate_sell.setVisibility(View.VISIBLE);
             }
         });
         donate.setOnClickListener(new View.OnClickListener() {
@@ -377,6 +438,33 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
+        submitSell.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(filterName.getText().toString().equals("Select Type")){
+                    Toast.makeText(Home.this, "Select type first", Toast.LENGTH_SHORT).show();
+                }else{
+                    Zone zone = new Zone(auth.getUid(), lat, lng, category, userCity, userCardinal,
+                            fromDateSell.getText().toString(), fromTimeSell.getText().toString(),
+                            filterName.getText().toString());
+                    DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child("Zones");
+                    dbref.child(auth.getUid()).setValue(zone);
+                    Toast.makeText(Home.this, "Items added successfully", Toast.LENGTH_SHORT).show();
+                    sellView.setVisibility(View.GONE);
+                    donorQR.setVisibility(View.VISIBLE);
+                }
+            }
+        });
+
+        donorQR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Home.this, Generate.class);
+                intent.putExtra("authid",auth.getUid());
+                startActivity(intent);
+            }
+        });
+
         volunteerAccept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -417,7 +505,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
-
         showRoute.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -426,6 +513,29 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             }
         });
 
+        dropDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                PopupMenu popupMenu = new PopupMenu(Home.this, dropDown);
+                // populate menu with 7 options
+                popupMenu.getMenu().add(1, 1, 1, "Paper");
+                popupMenu.getMenu().add(1, 2, 2, "E-waste");
+                // show the menu
+                popupMenu.show();
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem menuItem) {
+                        switch(menuItem.getItemId()){
+                            case 1 : filterName.setText("Paper");
+                                break;
+                            case 2 : filterName.setText("E-waste");
+                                break;
+                        }
+                        return true;
+                    }
+                });
+            }
+        });
 
         final NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(
@@ -830,11 +940,20 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                                     date = zone.getDate();
                                                     time = zone.getTime();
                                                     toCollect = zone.getBandwidth();
+                                                    type = zone.getType();
                                                     donorName = user.getName();
                                                     donorImg = user.getUserImgUrl();
-                                                    final Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
-                                                            userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,0,toCollect,ngoAuthKey);
-                                                    dbref.setValue(tracker);
+                                                    if(!type.isEmpty()){
+                                                        final Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
+                                                                userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,
+                                                                0,type,ngoAuthKey);
+                                                        dbref.setValue(tracker);
+                                                    }else{
+                                                        final Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
+                                                                userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,
+                                                                0,toCollect,ngoAuthKey);
+                                                        dbref.setValue(tracker);
+                                                    }
                                                     loadSpinner();
                                                     /*DatabaseReference dbbw = FirebaseDatabase.getInstance().getReference()
                                                             .child("ngo").child(ngoAuthKey).child("bandwidth");
@@ -981,12 +1100,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                         marker.remove();
                         marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result));
                         mMap.setMaxZoomPreference(20);
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
                     }
                     else{
                         marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result));
                         mMap.setMaxZoomPreference(20);
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
                     }
 
 

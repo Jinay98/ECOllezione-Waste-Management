@@ -4,6 +4,7 @@ public class Zone {
     String zoneCreator, zoneLat , zoneLong, category, city, cardinal;
     String date, time;
     Bandwidth bandwidth;
+    String type;
 
     public Zone() {
     }
@@ -19,6 +20,27 @@ public class Zone {
         this.date = date;
         this.time = time;
         this.bandwidth = bandwidth;
+    }
+
+    public Zone(String zoneCreator, String zoneLat, String zoneLong, String category, String city, String cardinal,
+                String date, String time, String type) {
+        this.zoneCreator = zoneCreator;
+        this.zoneLat = zoneLat;
+        this.zoneLong = zoneLong;
+        this.category = category;
+        this.city = city;
+        this.cardinal = cardinal;
+        this.date = date;
+        this.time = time;
+        this.type = type;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getZoneCreator() {
