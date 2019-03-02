@@ -10,6 +10,7 @@ public class Industry {
     private String industryAddress;
     private String industryCity;
     private String industryCardinality;
+    private String ilat, ilong, collectionDay;
     private long reg_status;
     private HashMap<String,Long> recycleType;
     private Volunteer toApprove;
@@ -18,7 +19,8 @@ public class Industry {
     private String officalImgUrl;
 
     public Industry(String name, String industryEmail, long industryContact, String userImgUrl, String industryAddress,
-                    String industryCity, String industryCardinality, long reg_status, HashMap<String,Long> recycleType, Volunteer toApprove,
+                    String industryCity, String industryCardinality, String ilat, String ilong, String collectionDay,
+                    long reg_status, HashMap<String, Long> recycleType, Volunteer toApprove,
                     HashMap<String, Boolean> approvedList, String industryRegNumber, String officalImgUrl) {
         this.name = name;
         this.industryEmail = industryEmail;
@@ -27,6 +29,9 @@ public class Industry {
         this.industryAddress = industryAddress;
         this.industryCity = industryCity;
         this.industryCardinality = industryCardinality;
+        this.ilat = ilat;
+        this.ilong = ilong;
+        this.collectionDay = collectionDay;
         this.reg_status = reg_status;
         this.recycleType = recycleType;
         this.toApprove = toApprove;
@@ -139,5 +144,29 @@ public class Industry {
 
     public void setOfficalImgUrl(String officalImgUrl) {
         this.officalImgUrl = officalImgUrl;
+    }
+
+    public String getIlat() {
+        return ilat;
+    }
+
+    public void setIlat(String ilat) {
+        this.ilat = ilat;
+    }
+
+    public String getIlong() {
+        return ilong;
+    }
+
+    public void setIlong(String ilong) {
+        this.ilong = ilong;
+    }
+
+    public String getCollectionDay() {
+        return collectionDay;
+    }
+
+    public void setCollectionDay(String collectionDay) {
+        this.collectionDay = collectionDay;
     }
 }

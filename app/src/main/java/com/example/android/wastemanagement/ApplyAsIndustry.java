@@ -44,7 +44,7 @@ import java.util.HashMap;
 
 public class ApplyAsIndustry extends AppCompatActivity {
 
-    EditText name,email,mobile_no,address, reg_no, city, cardinal, bandwidth;
+    EditText name,email,mobile_no,address, reg_no, city, cardinal, bandwidth, collectionDay;
     Button submit, submitstep1;
     LinearLayout clicksubmit,step1,step2, filterLayout;
     TextView afterText, filterName;
@@ -80,6 +80,7 @@ public class ApplyAsIndustry extends AppCompatActivity {
         filterLayout = findViewById(R.id.filterLayout);
         filterName = findViewById(R.id.filterName);
         bandwidth = findViewById(R.id.industryBandwidth);
+        collectionDay = findViewById(R.id.collectionDay);
 
 
         dialog = new ProgressDialog(ApplyAsIndustry.this);
@@ -194,8 +195,10 @@ public class ApplyAsIndustry extends AppCompatActivity {
                     Toast.makeText(ApplyAsIndustry.this, "Select type first", Toast.LENGTH_SHORT).show();
                 }else if(TextUtils.isEmpty(bandwidth.getText().toString().trim())){
                     Toast.makeText(ApplyAsIndustry.this, "Enter Bandwidth", Toast.LENGTH_SHORT).show();
+                }else if(TextUtils.isEmpty(collectionDay.getText().toString().trim())){
+                    Toast.makeText(ApplyAsIndustry.this, "Enter Collection Day", Toast.LENGTH_SHORT).show();
                 }else{
-                    Industry industry = new Industry(Nname, Nemail, Nmobile, userImageUrl, Naddress, Ncity, Ncardinal, 1,
+                    Industry industry = new Industry(Nname, Nemail, Nmobile, userImageUrl, Naddress, Ncity, Ncardinal,null,null, collectionDay.getText().toString(), 1,
                             new HashMap<String, Long>(){{put(filterName.getText().toString(),Long.valueOf(bandwidth.getText().toString())); }} ,
                             new Volunteer(null,null,0,null,
                                     null,0,0,null,null),

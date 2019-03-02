@@ -49,6 +49,79 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="1.0">
         <LinearLayout
+            android:id="@+id/sell_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <ImageView
+                android:background="@drawable/whitebutton"
+                android:padding="5dp"
+                android:layout_marginTop="3dp"
+                android:layout_marginRight="8dp"
+                android:layout_gravity="right"
+                android:id="@+id/create_post_cancel_sell"
+                android:layout_weight="7"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                app:srcCompat="@drawable/ic_close_black_24dp"/>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginLeft="10dp">
+                <TextView
+                    android:id="@+id/filterName"
+                    android:layout_width="180dp"
+                    android:layout_height="wrap_content"
+                    android:text="Select Type"
+                    android:gravity="center_vertical"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginLeft="5dp"/>
+                <ImageView
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginTop="10dp"
+                    app:srcCompat="@drawable/ic_arrow_drop_down_black_24dp"/>
+                <EditText
+                    android:id="@+id/industryBandwidth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="Bandwidth"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_marginLeft="15dp"
+                android:weightSum="2"
+                android:layout_marginTop="3dp"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/fromTimeSell"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Time"/>
+
+                <TextView
+                    android:id="@+id/fromDateSell"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="Select Date"/>
+            </LinearLayout>
+            <Button
+                android:id="@+id/submitSell"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Submit"
+                android:textColor="@color/white"
+                android:background="@color/blue_bright"/>
+        </LinearLayout>
+        <LinearLayout
             android:id="@+id/donation_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -331,13 +404,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
         </LinearLayout>
-        <Button
-            android:id="@+id/donate"
+        <LinearLayout
+            android:id="@+id/donate_sell"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Donate"
-            android:textColor="@color/white"
-            android:background="@color/blue_bright"/>
+            android:orientation="horizontal"
+            android:weightSum="2">
+            <Button
+                android:id="@+id/donate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Donate"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:background="@color/blue_light"/>
+            <Button
+                android:id="@+id/sell"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sell"
+                android:layout_weight="1"
+                android:textColor="@color/white"
+                android:background="@color/blue_bright"/>
+
+        </LinearLayout>
         <Button
             android:id="@+id/donorQRgenr"
             android:layout_width="match_parent"

@@ -106,8 +106,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private static final int REQUEST_LOCATION_PERMISSION = 1;
     Marker marker;
     LocationListener locationListener;
-    Button donate, submitDonation, donorQR, ngoQR, showRoute, volunteerAccept, volunteerReject, volunteerScanQR;
-    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan;
+    Button donate, sell, submitDonation, donorQR, ngoQR, showRoute, volunteerAccept, volunteerReject, volunteerScanQR;
+    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan, donate_sell, sellView;
     ImageView aclothes,agrains,apacked,astationary,afurniture,aelectronic;
     ImageView mclothes,mgrains,mpacked,mstationary,mfurniture,melectronic;
     TextView qclothes,qgrains,qpacked,qstationary,qfurniture,qelectronic;
@@ -152,6 +152,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         donate = findViewById(R.id.donate);
+        sell = findViewById(R.id.sell);
+        donate_sell = findViewById(R.id.donate_sell);
+        sellView = findViewById(R.id.sell_view);
         submitDonation = findViewById(R.id.submitDonation);
         donationView = findViewById(R.id.donation_view);
         donorQR = findViewById(R.id.donorQRgenr);
@@ -324,15 +327,23 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onClick(View view) {
                donationView.setVisibility(View.GONE);
-               donate.setVisibility(View.VISIBLE);
+               donate_sell.setVisibility(View.VISIBLE);
             }
         });
         donate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 donationView.setVisibility(View.VISIBLE);
-                donate.setVisibility(View.GONE);
+                donate_sell.setVisibility(View.GONE);
                 category = "ngo";
+            }
+        });
+        sell.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sellView.setVisibility(View.VISIBLE);
+                donate_sell.setVisibility(View.GONE);
+                category = "industry";
             }
         });
         volunteerScanQR.setOnClickListener(new View.OnClickListener() {
@@ -495,7 +506,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 userType = dataSnapshot.getValue(String.class);
-                DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child(userType).child(auth.getUid());
+                final DatabaseReference dbref = FirebaseDatabase.getInstance().getReference().child(userType).child(auth.getUid());
                 dbref.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot1) {
@@ -508,7 +519,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             userCardinal = user.getUserCardinality();
                             userDonationStatus = user.getDonation_status();
                             if(userDonationStatus==1){
-                                donate.setVisibility(View.GONE);
+                                donate_sell.setVisibility(View.GONE);
                                 donorQR.setVisibility(View.VISIBLE);
                             }
                             if(!user.getUserImgUrl().equals("no")){
@@ -520,7 +531,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                 startActivity(intent);
                             }
                         }else if(userType.equals("volunteer")){
-                            donate.setVisibility(View.GONE);
+                            donate_sell.setVisibility(View.GONE);
                             Volunteer user = dataSnapshot1.getValue(Volunteer.class);
                             username = user.getName();
                             userImgUrl = user.getUserImgUrl();
@@ -538,7 +549,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             }else if(user.getAccept_status()==1){
                                 loadGeoFence();
                             }
-                            donate.setVisibility(View.GONE);
+                            donate_sell.setVisibility(View.GONE);
                             volunteerView.setVisibility(View.VISIBLE);
                             final DatabaseReference dbref = FirebaseDatabase.getInstance().getReference()
                                     .child("tracker").child(auth.getUid());
@@ -562,7 +573,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             });
 
                         }else if(userType.equals("ngo")){
-                            donate.setVisibility(View.GONE);
+                            donate_sell.setVisibility(View.GONE);
                             Ngo user = dataSnapshot1.getValue(Ngo.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getNgoEmail());
@@ -577,23 +588,27 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             }else{
                                 navigationView.getMenu().findItem(R.id.approve_volunteers).setVisible(true);
                             }
-                            donate.setVisibility(View.GONE);
+                            donate_sell.setVisibility(View.GONE);
                             ngoQR.setVisibility(View.VISIBLE);
                         }else if(userType.equals("industry")){
-                            donate.setVisibility(View.GONE);
+                            donate_sell.setVisibility(View.GONE);
                             Industry user = dataSnapshot1.getValue(Industry.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getIndustryEmail());
                             userPoints.setVisibility(View.GONE);
+                            dbref.child("ilat").setValue(String.valueOf(latitude));
+                            dbref.child("ilong").setValue(String.valueOf(longitude));
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
                             }
                             if(user.getReg_status()==0){
                                 //open applyAsIndustry form
+                                Intent intent = new Intent(Home.this, ApplyAsIndustry.class);
+                                startActivity(intent);
                             }else{
                                 navigationView.getMenu().findItem(R.id.approve_volunteers).setVisible(true);
                             }
-                            donate.setVisibility(View.GONE);
+                            donate_sell.setVisibility(View.GONE);
                             ngoQR.setVisibility(View.VISIBLE);
                         }
                     }
