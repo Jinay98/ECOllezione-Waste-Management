@@ -432,6 +432,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 AlertName.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         // what ever you want to do with No option.
+                        infoDetails = "";
                         dialog.dismiss();
                     }
                 });
@@ -460,6 +461,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     donationView.setVisibility(View.GONE);
                     donorQR.setVisibility(View.VISIBLE);
                 }
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                        .child("donor").child(auth.getUid()).child("donation_status");
+                ref.setValue((long)1);
             }
         });
 
@@ -620,7 +624,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             if (userF == null) {
                                 // user auth state is changed - user is null
                                 // launch login activity
-                                Intent intent = new Intent(Home.this, Login.class);
+                                Intent intent = new Intent(Home.this, Launcher.class);
                                 startActivity(intent);
                                 finish();
                             }
@@ -786,8 +790,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                 Intent intent = new Intent(Home.this, ApplyAsSociety.class);
                                 startActivity(intent);
                             }
-
-
                         }
                     }
 
