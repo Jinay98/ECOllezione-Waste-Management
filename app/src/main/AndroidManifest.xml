@@ -37,6 +37,7 @@
         <activity android:name=".ApproveVolunteer" />
         <activity android:name=".Wall" />
         <activity android:name=".ApplyAsDonor" />
+        <activity android:name=".ApplyAsSociety" />
         <activity android:name=".ApplyAsIndustry" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

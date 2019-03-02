@@ -394,11 +394,19 @@
             android:orientation="horizontal"
             android:layout_margin="10dp"
             android:background="@color/white"
+            android:weightSum="6"
             android:visibility="gone">
             <Spinner
                 android:id="@+id/donorList_spinner"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="5"/>
+            <ImageView
+                android:id="@+id/info"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:srcCompat="@drawable/ic_info_black_24dp" />
         </LinearLayout>
         <LinearLayout
             android:id="@+id/donate_sell"

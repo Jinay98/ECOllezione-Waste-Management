@@ -2,12 +2,14 @@ package com.example.android.wastemanagement;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -101,10 +103,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private FirebaseUser userF;
     private TextView userName, userEmail , userPoints, filterName;
     EditText bandwidth;
+    TextView textView;
     DatabaseReference dbuser, dbtoken ,reff;
-    ImageView userImg;
+    ImageView userImg, info;
     long userDonationStatus;
-    String userType, userCity, userCardinal;
+    String userType, userCity, userCardinal, infoDetails = "";
     private GoogleMap mMap;
     LocationManager locationManager;
     private static final int REQUEST_LOCATION_PERMISSION = 1;
@@ -131,13 +134,15 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     List<String> volunteerLati = new ArrayList<>();
     List<String> volunteerLongi = new ArrayList<>();
     List<String> donorAuthKey = new ArrayList<>();
+    List<Bandwidth> bandwithList = new ArrayList<>();
+    List<Boolean> isNGOItem = new ArrayList<>();
     String donorName, donorImg, donorLat, donorLong, volunteerName, volunteerImg, volunteerLat, volunteerLong;
     String date, time, ngoAuthKey, username, userImgUrl, donorAuth, type;
     LatLng source, dest;
-    Bandwidth toCollect, cmpBandwidth;
+    Bandwidth toCollect, cmpBandwidth, getBandwidthTracker;
     Spinner donorSpinner;
     Boolean alreadyZoned = false;
-
+    AlertDialog.Builder AlertName;
     double latitude , longitude;
 
     @Override
@@ -157,6 +162,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
         donate = findViewById(R.id.donate);
         sell = findViewById(R.id.sell);
+        info = findViewById(R.id.info);
         donate_sell = findViewById(R.id.donate_sell);
         sellView = findViewById(R.id.sell_view);
         dropDown = findViewById(R.id.dropDown);
@@ -414,6 +420,24 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 startActivity(new Intent(Home.this,Scan.class));
             }
         });
+        info.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertName = new AlertDialog.Builder(Home.this);
+                textView = new TextView(Home.this);
+                textView.setText(infoDetails);
+                AlertName.setTitle("Collection Details");
+                //alert.setMessage("Enter Your Title");
+                AlertName.setView(textView);
+                AlertName.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // what ever you want to do with No option.
+                        dialog.dismiss();
+                    }
+                });
+                AlertName.show();
+            }
+        });
         submitDonation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -494,9 +518,37 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     volunteer_acc_rej.setVisibility(View.GONE);
                     volunteer_route_scan.setVisibility(View.VISIBLE);
                 }
+                if(isNGOItem.get(i)){
+                    info.setVisibility(View.VISIBLE);
+                }else{
+                    info.setVisibility(View.GONE);
+                }
+                infoDetails = "";
                 source = new LatLng(Double.valueOf(volunteerLati.get(i)), Double.valueOf(volunteerLongi.get(i)));
                 dest = new LatLng(Double.valueOf(donorLati.get(i)), Double.valueOf(donorLongi.get(i)));
                 donorAuth = donorAuthKey.get(i);
+                if(bandwithList.get(i).getClothes()>0){
+                    infoDetails += "\n        Clothes : "+String.valueOf(bandwithList.get(i).getClothes());
+                }
+                if(bandwithList.get(i).getPackedFood()>0){
+                    infoDetails += "\n        Packed Food : "+String.valueOf(bandwithList.get(i).getPackedFood());
+                }
+                if(bandwithList.get(i).getGrains()>0){
+                    infoDetails += "\n        Grains : "+String.valueOf(bandwithList.get(i).getGrains());
+                }
+                if(bandwithList.get(i).getStationary()>0){
+                    infoDetails += "\n        Stationary : "+String.valueOf(bandwithList.get(i).getStationary());
+                }
+                if(bandwithList.get(i).getHouseholdProduct()>0){
+                    infoDetails += "\n        Household Product : "+String.valueOf(bandwithList.get(i).getHouseholdProduct());
+                }
+                if(bandwithList.get(i).getFurniture()>0){
+                    infoDetails += "\n        Furniture : "+String.valueOf(bandwithList.get(i).getFurniture());
+                }
+                if(bandwithList.get(i).getElectronics()>0){
+                    infoDetails += "\n        Electronics : "+String.valueOf(bandwithList.get(i).getElectronics());
+                }
+
 
             }
 
@@ -816,6 +868,14 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                         donorLongi.add(snapshot.child("donorLong").getValue(String.class));
                         volunteerLati.add(snapshot.child("volunteerLat").getValue(String.class));
                         volunteerLongi.add(snapshot.child("volunteerLong").getValue(String.class));
+                        getBandwidthTracker = snapshot.child("toCollect").getValue(Bandwidth.class);
+                        if(getBandwidthTracker!=null){
+                            isNGOItem.add(true);
+                            bandwithList.add(getBandwidthTracker);
+                        }else{
+                            isNGOItem.add(false);
+                            bandwithList.add(new Bandwidth());
+                        }
                     }
                 }
                 ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -898,7 +958,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 int i = 0;
-
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
 
                     Zone zone = ds.getValue(Zone.class);
@@ -959,7 +1018,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                                     type = zone.getType();
                                                     donorName = user.getName();
                                                     donorImg = user.getUserImgUrl();
-                                                    if(!type.isEmpty()){
+                                                    if(type!=null){
                                                         final Tracker tracker = new Tracker(donorName,donorImg,donorLat,donorLong,username,
                                                                 userImgUrl,String.valueOf(latitude), String.valueOf(longitude), date,time,
                                                                 0,type,ngoAuthKey);
