@@ -137,7 +137,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     List<Bandwidth> bandwithList = new ArrayList<>();
     List<Boolean> isNGOItem = new ArrayList<>();
     String donorName, donorImg, donorLat, donorLong, volunteerName, volunteerImg, volunteerLat, volunteerLong;
-    String date, time, ngoAuthKey, username, userImgUrl, donorAuth, type;
+    String date, time, ngoAuthKey, username, userImgUrl, donorAuth, type, passedUser;
     LatLng source, dest;
     Bandwidth toCollect, cmpBandwidth, getBandwidthTracker;
     Spinner donorSpinner;
@@ -417,7 +417,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         volunteerScanQR.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(Home.this,Scan.class));
+                Intent intent = new Intent(Home.this,Scan.class);
+                intent.putExtra("donorKey", donorAuth);
+                intent.putExtra("type",passedUser);
+                startActivity(intent);
             }
         });
         info.setOnClickListener(new View.OnClickListener() {
@@ -506,6 +509,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 DatabaseReference dbMyloc = FirebaseDatabase.getInstance().getReference()
                         .child("MyLocation").child(donorAuth);
                 dbMyloc.getRef().removeValue();
+                inZoneOf.remove()
                 volunteer_acc_rej.setVisibility(View.GONE);
                 volunteer_route_scan.setVisibility(View.VISIBLE);
             }
@@ -528,8 +532,13 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     info.setVisibility(View.GONE);
                 }
                 infoDetails = "";
+                if(!donorLati.get(i).equals("no")){
+                    passedUser = "donor";
+                    dest = new LatLng(Double.valueOf(donorLati.get(i)), Double.valueOf(donorLongi.get(i)));
+                }else{
+                    passedUser = "ngo";
+                }
                 source = new LatLng(Double.valueOf(volunteerLati.get(i)), Double.valueOf(volunteerLongi.get(i)));
-                dest = new LatLng(Double.valueOf(donorLati.get(i)), Double.valueOf(donorLongi.get(i)));
                 donorAuth = donorAuthKey.get(i);
                 if(bandwithList.get(i).getClothes()>0){
                     infoDetails += "\n        Clothes : "+String.valueOf(bandwithList.get(i).getClothes());
@@ -899,7 +908,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
 
         String url="https://maps.googleapis.com/maps/api/directions/json?origin="+source.latitude+","+source.longitude+"" +
-                "&destination="+des.latitude+","+des.longitude+"&key="+"";
+                "&destination="+des.latitude+","+des.longitude+"&key="+"AIzaSyBqrewZNjkvVx28YqwDe718zPxzwV9zBkE";
         System.out.println("The url is ="+url);
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(this);
@@ -1076,7 +1085,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                 }
                             }
                             //Add data to DB for tracking and Accept/Reject
-                            sendNotification("DangerZone -"+key,String.format("%s Entered into the ZoneArea",key));
+                            sendNotification("Donor near you",String.format("You Entered into the Donation Zone"));
 
                         }
                     }
@@ -1084,7 +1093,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
                     public void onKeyExited(String key) {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            sendNotification("DangerZone",String.format("%s Exited from the ZoneArea",key));
+                            sendNotification("You",String.format("%s Exited from the ZoneArea",key));
                         }
 
                     }
@@ -1129,12 +1138,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         }
 
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, channelId)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.earth)
                 .setContentTitle(title)
                 .setContentText(content);
 
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        Intent intent = new Intent(this , MapsActivity.class);
+        Intent intent = new Intent(this , Home.class);
         stackBuilder.addNextIntent(intent);
         PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
                 0,

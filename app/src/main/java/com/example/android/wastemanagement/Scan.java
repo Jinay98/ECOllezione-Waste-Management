@@ -35,6 +35,7 @@ public class Scan extends AppCompatActivity {
     private FirebaseAuth auth;
     List<Long> al = new ArrayList<Long>();
     long sum=0;
+    String donorKey, userType;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +50,13 @@ public class Scan extends AppCompatActivity {
 
         btn = (Button) findViewById(R.id.btn);
 
+        Bundle bd = getIntent().getExtras();
+
+        if(bd!=null) {
+            donorKey = bd.getString("donorKey");
+            userType = bd.getString("type");
+            Toast.makeText(Scan.this,userType,Toast.LENGTH_SHORT).show();
+        }
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -83,36 +91,48 @@ public class Scan extends AppCompatActivity {
                     final String id = result.getContents();
                     Log.d("ID",id);
 
-                    reference=reference.child(auth.getUid()).child(id).child("toCollect");
-                    reference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            Bandwidth bandwidth = dataSnapshot.getValue(Bandwidth.class);
-                            final long sum = bandwidth.getClothes()*5 + bandwidth.getElectronics()*10+bandwidth.getFurniture()*5+
-                                        bandwidth.getGrains()*5+bandwidth.getHouseholdProduct()*5+bandwidth.getPackedFood()*5+
-                                        bandwidth.getStationary()*5;
-                            Log.d("SUM", String.valueOf(sum));
-                            final DatabaseReference db=FirebaseDatabase.getInstance().getReference().child("donor").child(id).child("userPoints");
-                            db.addListenerForSingleValueEvent(new ValueEventListener() {
+                    if(donorKey.equals(id)){
+                        if(userType.equals("donor")){
+                            DatabaseReference dbTracker = FirebaseDatabase.getInstance().getReference().child("tracker")
+                                    .child(auth.getUid()).child(donorKey).child("donorLat");
+                            dbTracker.setValue("no");
+                            reference=reference.child(auth.getUid()).child(id).child("toCollect");
+                            reference.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                    Long temppoints=dataSnapshot.getValue(Long.class);
-                                    db.setValue(temppoints+sum);
-                                    startActivity(new Intent(Scan.this,Home.class));
-                                }
+                                    Bandwidth bandwidth = dataSnapshot.getValue(Bandwidth.class);
+                                    final long sum = bandwidth.getClothes()*5 + bandwidth.getElectronics()*10+bandwidth.getFurniture()*5+
+                                            bandwidth.getGrains()*5+bandwidth.getHouseholdProduct()*5+bandwidth.getPackedFood()*5+
+                                            bandwidth.getStationary()*5;
+                                    Log.d("SUM", String.valueOf(sum));
+                                    final DatabaseReference db=FirebaseDatabase.getInstance().getReference().child("donor").child(id);
+                                    db.child("donation_status").setValue((long)0);
+                                    db.child("userPoints").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Long temppoints=dataSnapshot.getValue(Long.class);
+                                            db.child("userPoints").setValue(temppoints+sum);
+                                            startActivity(new Intent(Scan.this,Home.class));
+                                        }
 
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
 
                                 }
                             });
+                        }else{
+                            Toast.makeText(Scan.this, "Successfully authenticated", Toast.LENGTH_SHORT).show();
                         }
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
-
+                    }else{
+                        Toast.makeText(Scan.this, "QR code cannot be authenticated, Please check the user",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         } else {
