@@ -1,23 +1,30 @@
 package com.example.android.wastemanagement.Models;
 
 public class Society {
-    String name, email; long acct1, acct2, acct3,userContact,reg_status; String userAddress, sLat , sLong;
+    String name, email;
+    long accOrganic, accPlastic, accGlass,userContact,reg_status;
+    String userAddress, sLat , sLong;
+    String organiciKey, plasticiKey, glassiKey;
 
-    public Society(String name, String email, long acct1, long acct2, long acct3, long userContact, String userAddress, String sLat, String sLong,long reg_status ) {
+    public Society(String name, String email, long accOrganic, long accPlastic, long accGlass, long userContact,
+                   long reg_status, String userAddress, String sLat, String sLong, String organiciKey, String plasticiKey,
+                   String glassiKey) {
         this.name = name;
         this.email = email;
-        this.acct1 = acct1;
-        this.acct2 = acct2;
-        this.acct3 = acct3;
+        this.accOrganic = accOrganic;
+        this.accPlastic = accPlastic;
+        this.accGlass = accGlass;
         this.userContact = userContact;
+        this.reg_status = reg_status;
         this.userAddress = userAddress;
         this.sLat = sLat;
         this.sLong = sLong;
-        this.reg_status=reg_status;
+        this.organiciKey = organiciKey;
+        this.plasticiKey = plasticiKey;
+        this.glassiKey = glassiKey;
     }
 
-    public Society() {
-    }
+    public Society(){}
 
     public String getName() {
         return name;
@@ -35,28 +42,28 @@ public class Society {
         this.email = email;
     }
 
-    public long getAcct1() {
-        return acct1;
+    public long getAccOrganic() {
+        return accOrganic;
     }
 
-    public void setAcct1(long acct1) {
-        this.acct1 = acct1;
+    public void setAccOrganic(long accOrganic) {
+        this.accOrganic = accOrganic;
     }
 
-    public long getAcct2() {
-        return acct2;
+    public long getAccPlastic() {
+        return accPlastic;
     }
 
-    public void setAcct2(long acct2) {
-        this.acct2 = acct2;
+    public void setAccPlastic(long accPlastic) {
+        this.accPlastic = accPlastic;
     }
 
-    public long getAcct3() {
-        return acct3;
+    public long getAccGlass() {
+        return accGlass;
     }
 
-    public void setAcct3(long acct3) {
-        this.acct3 = acct3;
+    public void setAccGlass(long accGlass) {
+        this.accGlass = accGlass;
     }
 
     public long getUserContact() {
@@ -65,6 +72,14 @@ public class Society {
 
     public void setUserContact(long userContact) {
         this.userContact = userContact;
+    }
+
+    public long getReg_status() {
+        return reg_status;
+    }
+
+    public void setReg_status(long reg_status) {
+        this.reg_status = reg_status;
     }
 
     public String getUserAddress() {
@@ -90,11 +105,28 @@ public class Society {
     public void setsLong(String sLong) {
         this.sLong = sLong;
     }
-    public long getReg_status() {
-        return reg_status;
+
+    public String getOrganiciKey() {
+        return organiciKey;
     }
 
-    public void setReg_status(long reg_status) {
-        this.reg_status = reg_status;
+    public void setOrganiciKey(String organiciKey) {
+        this.organiciKey = organiciKey;
+    }
+
+    public String getPlasticiKey() {
+        return plasticiKey;
+    }
+
+    public void setPlasticiKey(String plasticiKey) {
+        this.plasticiKey = plasticiKey;
+    }
+
+    public String getGlassiKey() {
+        return glassiKey;
+    }
+
+    public void setGlassiKey(String glassiKey) {
+        this.glassiKey = glassiKey;
     }
 }
