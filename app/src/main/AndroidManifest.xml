@@ -55,7 +55,8 @@
             android:label="@string/title_activity_maps" />
         <activity android:name=".Scan" />
         <activity android:name=".ScanQ" />
-        <activity android:name=".Generate"></activity>
+        <activity android:name=".Generate" />
+        <activity android:name=".ApplyAsSociety"></activity>
     </application>
 
 </manifest>
