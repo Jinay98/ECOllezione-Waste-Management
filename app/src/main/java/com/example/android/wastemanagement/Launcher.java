@@ -13,7 +13,7 @@ public class Launcher extends AppCompatActivity {
 
     ProgressDialog loginProgress;
     private FirebaseAuth auth;
-    private CardView donor_card, volunteer_card, ngo_card, industry_card, admin_card;
+    private CardView donor_card, volunteer_card, ngo_card, industry_card, admin_card,society_card;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +36,7 @@ public class Launcher extends AppCompatActivity {
         ngo_card = findViewById(R.id.ngo_card);
         industry_card = findViewById(R.id.industry_card);
         admin_card = findViewById(R.id.admin_card);
-
+        society_card=findViewById(R.id.society_card);
         donor_card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -71,6 +71,14 @@ public class Launcher extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        society_card.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Launcher.this,Register.class);
+                intent.putExtra("type","society");
+                startActivity(intent);
+            }
+        });
         admin_card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -79,6 +87,7 @@ public class Launcher extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
 
     }
 }
