@@ -27,6 +27,11 @@
             android:title="Wall"
             />
         <item
+            android:id="@+id/donationdrive"
+            android:icon="@drawable/maps"
+            android:title="Donation Drive"
+            />
+        <item
             android:id="@+id/map"
             android:icon="@drawable/maps"
             android:title="Map"

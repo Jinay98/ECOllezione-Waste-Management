@@ -92,8 +92,12 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import static java.sql.Types.NULL;
 
 public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -144,6 +148,29 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     Boolean alreadyZoned = false;
     AlertDialog.Builder AlertName;
     double latitude , longitude;
+
+
+
+    LatLng lt1 , lt2;
+    DatabaseReference ref1 , ref2;
+    List<LatLng> db = new ArrayList<LatLng>();
+    List<Double> dis = new ArrayList<Double>();
+    List<String> str = new ArrayList<String>();
+    String industryType;
+
+    List<LatLng> glLat = new ArrayList<>();
+    List<LatLng> orgLat = new ArrayList<>();
+    List<LatLng> plsLat = new ArrayList<>();
+
+
+    List<String> plsKey = new ArrayList<>();
+    List<String> orgKey = new ArrayList<>();
+    List<String> glKey = new ArrayList<>();
+
+    double minDistance = 999999;
+    int index =0;
+    String industryAllocatedGlass;
+    double minGl;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -509,7 +536,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 DatabaseReference dbMyloc = FirebaseDatabase.getInstance().getReference()
                         .child("MyLocation").child(donorAuth);
                 dbMyloc.getRef().removeValue();
-                inZoneOf.remove()
+
                 volunteer_acc_rej.setVisibility(View.GONE);
                 volunteer_route_scan.setVisibility(View.VISIBLE);
             }
@@ -662,6 +689,10 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             Intent intent = new Intent(Home.this, Scan.class);
                             startActivity(intent);
                         }
+                        if(menuItem.getItemId() == R.id.donationdrive){
+                            Intent intent = new Intent(Home.this, DonationDrive.class);
+                            startActivity(intent);
+                        }
 
                         // Add code here to update the UI based on the item selected
                         // For example, swap UI fragments here
@@ -799,6 +830,133 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                                 Intent intent = new Intent(Home.this, ApplyAsSociety.class);
                                 startActivity(intent);
                             }
+                            ref1 = FirebaseDatabase.getInstance().getReference().child("industry");
+                            ref2 = FirebaseDatabase.getInstance().getReference().child("society").child(auth.getUid());
+
+                            ref1.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    for(DataSnapshot dataSnapshot1 : dataSnapshot.getChildren()){
+                                        Industry industry = dataSnapshot1.getValue(Industry.class);
+                                        String industryKey = dataSnapshot1.getKey();
+
+                                        String lat = industry.getIlat().toString().trim();
+                                        String lon = industry.getIlong().toString().trim();
+
+                                        HashMap<String , Long> hm = industry.getRecycleType();
+                                        for ( String key : hm.keySet() ) {
+                                            industryType = key;
+                                        }
+
+                                        Log.d("JINAY",industryType);
+
+                                        double latitude = Double.parseDouble(lat);
+                                        double longitude = Double.parseDouble(lon);
+                                        lt1 = new LatLng(latitude , longitude);
+
+                                        if(industryType.equalsIgnoreCase("paper")){
+                                            plsKey.add(industryKey);
+                                            plsLat.add(lt1);
+                                        }
+
+                                        if(industryType.equalsIgnoreCase("e-waste")){
+                                            orgKey.add(industryKey);
+                                            orgLat.add(lt1);
+                                        }
+
+                                        if(industryType.equalsIgnoreCase("paper")){
+                                            glKey.add(industryKey);
+                                            glLat.add(lt1);
+                                        }
+                                    }
+
+                                    ref2.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            Society society = dataSnapshot.getValue(Society.class);
+                                            String lat = society.getsLat().toString().trim();
+                                            String lon = society.getsLong().toString().trim();
+
+                                            double latitude = Double.parseDouble(lat);
+                                            double longitude = Double.parseDouble(lon);
+                                            lt2 = new LatLng(latitude , longitude);
+                                            Location endPoint=new Location("locationA");
+                                            endPoint.setLatitude(lt2.latitude);
+                                            endPoint.setLongitude(lt2.longitude);
+
+                                            for(int i=0;i<plsLat.size();i++){
+                                                Location startPoint=new Location("locationA");
+                                                startPoint.setLatitude(plsLat.get(i).latitude);
+                                                startPoint.setLongitude(plsLat.get(i).longitude);
+
+                                                double distance=startPoint.distanceTo(endPoint);
+                                                if(distance < minDistance){
+                                                    minDistance = distance;
+                                                    index=i;
+                                                }
+                                                dis.add(distance);
+                                            }
+                                            double minPls = minDistance;
+                                            String industryAllocatedPlastic = plsKey.get(index);
+                                            dis.clear();
+
+                                            for(int i=0;i<orgLat.size();i++){
+                                                Location startPoint=new Location("locationA");
+                                                startPoint.setLatitude(orgLat.get(i).latitude);
+                                                startPoint.setLongitude(orgLat.get(i).longitude);
+
+                                                double distance=startPoint.distanceTo(endPoint);
+                                                dis.add(distance);
+                                            }
+                                            double minOrg = Collections.min(dis);
+                                            index = dis.indexOf(minOrg);
+                                            String industryAllocatedOrganic = orgKey.get(index);
+                                            dis.clear();
+
+                                            if(plsLat.size()!=NULL) {
+                                                for (int i = 0; i < glLat.size(); i++) {
+                                                    Location startPoint = new Location("locationA");
+                                                    startPoint.setLatitude(glLat.get(i).latitude);
+                                                    startPoint.setLongitude(glLat.get(i).longitude);
+
+                                                    double distance = startPoint.distanceTo(endPoint);
+                                                    dis.add(distance);
+                                                }
+                                                minGl = Collections.min(dis);
+                                                index = dis.indexOf(minGl);
+                                                industryAllocatedGlass = glKey.get(index);
+                                            }
+
+
+                                            Log.d("PlasticKey",industryAllocatedPlastic);
+                                            Log.d("VALUE", String.valueOf(minPls));
+
+                                            Log.d("OrganicKey",industryAllocatedOrganic);
+                                            Log.d("VALUE", String.valueOf(minOrg));
+
+                                            Log.d("GlassKey",industryAllocatedGlass);
+                                            Log.d("VALUE", String.valueOf(minGl));
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+
+                                        }
+                                    });
+
+
+
+
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+
+
+                            });
                         }
                     }
 

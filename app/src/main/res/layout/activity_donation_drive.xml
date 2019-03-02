@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DonationDrive">
+
+    <EditText
+        android:id="@+id/date"
+        android:layout_width="316dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/et3"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="427dp"
+        android:ems="10"
+        android:hint="ENTER THE DATE"
+        android:inputType="textMultiLine" />
+
+    <EditText
+        android:id="@+id/et1"
+        android:layout_width="323dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="115dp"
+        android:ems="10"
+        android:hint="ENTER THE TITLE OF DONATION DRIVE"
+        android:inputType="textPersonName" />
+
+    <EditText
+        android:id="@+id/et2"
+        android:layout_width="316dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="186dp"
+        android:ems="10"
+        android:hint="ENTER THE DETAILS"
+        android:inputType="textMultiLine" />
+
+    <EditText
+        android:id="@+id/et3"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:ems="10"
+        android:hint="ENTER THE NUMBER OF VOLUNTEERS REQUIRED"
+        android:inputType="textMultiLine" />
+
+    <EditText
+        android:id="@+id/et4"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="161dp"
+        android:ems="10"
+        android:hint="ENTER YOUR COMMENTS / QUERY HERE"
+        android:inputType="textMultiLine" />
+
+    <TextView
+        android:id="@+id/titleDonationDrive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="43dp"
+        android:textSize="40dp"
+        android:text="DONATION DRIVE" />
+
+    <Button
+        android:id="@+id/submitDonationDrive"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginStart="136dp"
+        android:layout_marginBottom="29dp"
+        android:text="SUBMIT" />
+
+</RelativeLayout>
