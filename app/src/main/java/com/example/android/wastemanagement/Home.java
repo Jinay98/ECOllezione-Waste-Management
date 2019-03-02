@@ -53,6 +53,7 @@ import com.bumptech.glide.Glide;
 import com.example.android.wastemanagement.Models.Bandwidth;
 import com.example.android.wastemanagement.Models.Industry;
 import com.example.android.wastemanagement.Models.Ngo;
+import com.example.android.wastemanagement.Models.Society;
 import com.example.android.wastemanagement.Models.Tracker;
 import com.example.android.wastemanagement.Models.User;
 import com.example.android.wastemanagement.Models.Volunteer;
@@ -611,6 +612,21 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             donate_sell.setVisibility(View.GONE);
                             ngoQR.setVisibility(View.VISIBLE);
                         }
+                        else if(userType.equals("society")){
+                            Society user=dataSnapshot1.getValue(Society.class);
+                            userName.setText(user.getName());
+                            userEmail.setText(user.getEmail());
+                            userPoints.setVisibility(View.GONE);
+                            dbref.child("sLat").setValue(String.valueOf(latitude));
+                            dbref.child("sLong").setValue(String.valueOf(longitude));
+                            if(user.getReg_status()==0){
+                                //open applyAsDonor form
+                                Intent intent = new Intent(Home.this, ApplyAsSociety.class);
+                                startActivity(intent);
+                            }
+
+
+                        }
                     }
 
                     @Override
@@ -981,12 +997,12 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                         marker.remove();
                         marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result));
                         mMap.setMaxZoomPreference(20);
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
                     }
                     else{
                         marker = mMap.addMarker(new MarkerOptions().position(latLng).title(result));
                         mMap.setMaxZoomPreference(20);
-                        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16.0f));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 12.0f));
                     }
 
 

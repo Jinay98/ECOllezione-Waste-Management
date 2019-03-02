@@ -1,9 +1,9 @@
 package com.example.android.wastemanagement.Models;
 
 public class Society {
-    String name, email; long acct1, acct2, acct3,userContact; String userAddress, sLat , sLong;
+    String name, email; long acct1, acct2, acct3,userContact,reg_status; String userAddress, sLat , sLong;
 
-    public Society(String name, String email, long acct1, long acct2, long acct3, long userContact, String userAddress, String sLat, String sLong) {
+    public Society(String name, String email, long acct1, long acct2, long acct3, long userContact, String userAddress, String sLat, String sLong,long reg_status ) {
         this.name = name;
         this.email = email;
         this.acct1 = acct1;
@@ -13,6 +13,7 @@ public class Society {
         this.userAddress = userAddress;
         this.sLat = sLat;
         this.sLong = sLong;
+        this.reg_status=reg_status;
     }
 
     public Society() {
@@ -88,5 +89,12 @@ public class Society {
 
     public void setsLong(String sLong) {
         this.sLong = sLong;
+    }
+    public long getReg_status() {
+        return reg_status;
+    }
+
+    public void setReg_status(long reg_status) {
+        this.reg_status = reg_status;
     }
 }

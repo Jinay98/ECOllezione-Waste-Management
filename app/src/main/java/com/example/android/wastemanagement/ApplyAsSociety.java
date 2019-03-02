@@ -1,5 +1,6 @@
 package com.example.android.wastemanagement;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -10,8 +11,11 @@ import android.widget.Toast;
 
 import com.example.android.wastemanagement.Models.Society;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class ApplyAsSociety extends AppCompatActivity {
     EditText name, email, mobile_no, address;
@@ -33,6 +37,20 @@ public class ApplyAsSociety extends AppCompatActivity {
         submitstep1 = findViewById(R.id.form_step1submit);
         auth = FirebaseAuth.getInstance();
         accountref = FirebaseDatabase.getInstance().getReference().child("society").child(auth.getUid());
+        accountref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Society society=dataSnapshot.getValue(Society.class);
+                name.setText(society.getName());
+                email.setText(society.getEmail());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         submitstep1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -51,8 +69,12 @@ public class ApplyAsSociety extends AppCompatActivity {
                 }
                 else
                 {
-                    Society society=new Society(Nname,Nemail,0,0,0,Nmobile,Naddress,null,null);
+                    Society society=new Society(Nname,Nemail,0,0,0,Nmobile,Naddress,null,null,1);
                     accountref.setValue(society);
+                    Toast.makeText(ApplyAsSociety.this, "Response Recorded", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(ApplyAsSociety.this, Home.class);
+                    startActivity(intent);
+                    finish();
                 }
             }
         });

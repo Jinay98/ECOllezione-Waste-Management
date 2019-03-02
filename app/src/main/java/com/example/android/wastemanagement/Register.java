@@ -16,6 +16,7 @@ import android.widget.Toast;
 import com.example.android.wastemanagement.Models.Bandwidth;
 import com.example.android.wastemanagement.Models.Industry;
 import com.example.android.wastemanagement.Models.Ngo;
+import com.example.android.wastemanagement.Models.Society;
 import com.example.android.wastemanagement.Models.User;
 import com.example.android.wastemanagement.Models.Volunteer;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -148,7 +149,11 @@ public class Register extends AppCompatActivity {
                                                 null, 0, 0,null, null), new HashMap<String, Boolean>(), "no", "no");
                                         DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("industry").child(auth.getUid());
                                         db.setValue(user);
-                                    }
+                                    }else if(userType.equals("society")){
+                                        Society society=new Society(username,email,0,0,0,0,"no",null,null,0);
+                                            DatabaseReference db=FirebaseDatabase.getInstance().getReference().child("society").child(auth.getUid());
+                                            db.setValue(society);
+                                        }
 
                                     dialog.dismiss();
                                     startActivity(new Intent(Register.this, Home.class));
