@@ -138,7 +138,8 @@ public class Wall extends AppCompatActivity {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             final String userType = dataSnapshot.getValue(String.class);
-                            DatabaseReference db = FirebaseDatabase.getInstance().getReference().child(userType).child(auth.getUid());
+                            DatabaseReference db = FirebaseDatabase.getInstance().getReference()
+                                    .child(userType).child(auth.getUid());
                             db.addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot1) {

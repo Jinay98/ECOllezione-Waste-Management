@@ -30,6 +30,7 @@
             android:id="@+id/map"
             android:icon="@drawable/maps"
             android:title="Map"
+            android:visible="false"
             />
         <item
             android:id="@+id/accSetting"

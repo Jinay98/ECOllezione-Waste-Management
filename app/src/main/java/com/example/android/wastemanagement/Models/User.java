@@ -10,12 +10,13 @@ public class User {
     private String userCardinality;
     private long reg_status;
     private long userPoints;
+    private double userEcoCash;
     private long donation_status;
     private String token;
 
     public User(String name, String email, long userContact, String userImgUrl,
                 String userAddress, String userCity, String userCardinality, long reg_status,
-                long userPoints, long donation_status, String token) {
+                long userPoints, long donation_status, String token, double userEcoCash) {
         this.name = name;
         this.email = email;
         this.userContact = userContact;
@@ -25,12 +26,20 @@ public class User {
         this.userCardinality = userCardinality;
         this.reg_status = reg_status;
         this.userPoints = userPoints;
+        this.userEcoCash = userEcoCash;
         this.donation_status = donation_status;
         this.token = token;
     }
 
     public User(){}
 
+    public double getUserEcoCash() {
+        return userEcoCash;
+    }
+
+    public void setUserEcoCash(double userEcoCash) {
+        this.userEcoCash = userEcoCash;
+    }
 
     public long getDonation_status() {
         return donation_status;

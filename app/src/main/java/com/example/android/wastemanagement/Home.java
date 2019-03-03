@@ -101,7 +101,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     public boolean closeview = false;
     private FirebaseAuth auth;
     private FirebaseUser userF;
-    private TextView userName, userEmail , userPoints, filterName;
+    private TextView userName, userEmail , userPoints, userCash, filterName;
     EditText bandwidth;
     TextView textView;
     DatabaseReference dbuser, dbtoken ,reff;
@@ -114,7 +114,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     Marker marker;
     LocationListener locationListener;
     Button donate, sell, submitDonation, submitSell, donorQR, ngoQR, showRoute, volunteerAccept, volunteerReject, volunteerScanQR;
-    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan, donate_sell, sellView, dropDown;
+    LinearLayout donationView, volunteerView, volunteer_acc_rej, volunteer_route_scan, donate_sell, sellView, dropDown, points;
     ImageView aclothes,agrains,apacked,astationary,afurniture,aelectronic;
     ImageView mclothes,mgrains,mpacked,mstationary,mfurniture,melectronic;
     TextView qclothes,qgrains,qpacked,qstationary,qfurniture,qelectronic;
@@ -420,6 +420,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 Intent intent = new Intent(Home.this,Scan.class);
                 intent.putExtra("donorKey", donorAuth);
                 intent.putExtra("type",passedUser);
+                intent.putExtra("isSell", info.getVisibility());
                 startActivity(intent);
             }
         });
@@ -484,6 +485,9 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                     Toast.makeText(Home.this, "Items added successfully", Toast.LENGTH_SHORT).show();
                     sellView.setVisibility(View.GONE);
                     donorQR.setVisibility(View.VISIBLE);
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference()
+                            .child("donor").child(auth.getUid()).child("donation_status");
+                    ref.setValue((long)1);
                 }
             }
         });
@@ -509,9 +513,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                 DatabaseReference dbMyloc = FirebaseDatabase.getInstance().getReference()
                         .child("MyLocation").child(donorAuth);
                 dbMyloc.getRef().removeValue();
-                inZoneOf.remove()
                 volunteer_acc_rej.setVisibility(View.GONE);
-                volunteer_route_scan.setVisibility(View.VISIBLE);
+                volunteer_route_scan.setVisibility  (View.VISIBLE);
             }
         });
 
@@ -674,6 +677,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
         userName = navigationView.getHeaderView(0).findViewById(R.id.head_name);
         userEmail = navigationView.getHeaderView(0).findViewById(R.id.head_email);
         userPoints = navigationView.getHeaderView(0).findViewById(R.id.head_points);
+        points = navigationView.getHeaderView(0).findViewById(R.id.points);
+        userCash = navigationView.getHeaderView(0).findViewById(R.id.head_cash);
         userImg = navigationView.getHeaderView(0).findViewById(R.id.user_image);
 
         Log.d("auth_id",auth.getUid());
@@ -690,7 +695,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             User user = dataSnapshot1.getValue(User.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getEmail());
-                            userPoints.setText("POINTS : "+ String.valueOf(user.getUserPoints()));
+                            userPoints.setText(String.valueOf(user.getUserPoints())+"\uD83D\uDC51");
+                            userCash.setText(String.valueOf(user.getUserEcoCash())+"💰");
                             userCity = user.getUserCity();
                             userCardinal = user.getUserCardinality();
                             userDonationStatus = user.getDonation_status();
@@ -712,6 +718,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             username = user.getName();
                             userImgUrl = user.getUserImgUrl();
                             userName.setText(user.getName());
+                            points.setVisibility(View.GONE);
                             userEmail.setText(user.getVolunteerEmail());
                             ngoAuthKey = user.getNgoAuthkey();
                             userPoints.setVisibility(View.GONE);
@@ -753,6 +760,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             Ngo user = dataSnapshot1.getValue(Ngo.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getNgoEmail());
+                            points.setVisibility(View.GONE);
                             userPoints.setVisibility(View.GONE);
                             if(!user.getUserImgUrl().equals("no")){
                                 Glide.with(getApplicationContext()).load(user.getUserImgUrl()).into(userImg);
@@ -770,6 +778,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             donate_sell.setVisibility(View.GONE);
                             Industry user = dataSnapshot1.getValue(Industry.class);
                             userName.setText(user.getName());
+                            points.setVisibility(View.GONE);
                             userEmail.setText(user.getIndustryEmail());
                             userPoints.setVisibility(View.GONE);
                             dbref.child("ilat").setValue(String.valueOf(latitude));
@@ -791,7 +800,6 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             Society user=dataSnapshot1.getValue(Society.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getEmail());
-                            userPoints.setVisibility(View.GONE);
                             dbref.child("sLat").setValue(String.valueOf(latitude));
                             dbref.child("sLong").setValue(String.valueOf(longitude));
                             if(user.getReg_status()==0){

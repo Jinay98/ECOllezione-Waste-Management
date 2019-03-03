@@ -36,6 +36,7 @@ public class Scan extends AppCompatActivity {
     List<Long> al = new ArrayList<Long>();
     long sum=0;
     String donorKey, userType;
+    double input;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,6 +56,7 @@ public class Scan extends AppCompatActivity {
         if(bd!=null) {
             donorKey = bd.getString("donorKey");
             userType = bd.getString("type");
+            input = (double)(bd.getInt("isSell"));
             Toast.makeText(Scan.this,userType,Toast.LENGTH_SHORT).show();
         }
         btn.setOnClickListener(new View.OnClickListener() {
@@ -96,30 +98,88 @@ public class Scan extends AppCompatActivity {
                             DatabaseReference dbTracker = FirebaseDatabase.getInstance().getReference().child("tracker")
                                     .child(auth.getUid()).child(donorKey).child("donorLat");
                             dbTracker.setValue("no");
-                            reference=reference.child(auth.getUid()).child(id).child("toCollect");
-                            reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                            reference.child(auth.getUid()).child(id).child("toCollect")
+                                    .addListenerForSingleValueEvent(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                     Bandwidth bandwidth = dataSnapshot.getValue(Bandwidth.class);
-                                    final long sum = bandwidth.getClothes()*5 + bandwidth.getElectronics()*10+bandwidth.getFurniture()*5+
-                                            bandwidth.getGrains()*5+bandwidth.getHouseholdProduct()*5+bandwidth.getPackedFood()*5+
-                                            bandwidth.getStationary()*5;
-                                    Log.d("SUM", String.valueOf(sum));
-                                    final DatabaseReference db=FirebaseDatabase.getInstance().getReference().child("donor").child(id);
-                                    db.child("donation_status").setValue((long)0);
-                                    db.child("userPoints").addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            Long temppoints=dataSnapshot.getValue(Long.class);
-                                            db.child("userPoints").setValue(temppoints+sum);
-                                            startActivity(new Intent(Scan.this,Home.class));
-                                        }
+                                    if (bandwidth != null) {
+                                        final long sum = bandwidth.getClothes()*5 + bandwidth.getElectronics()*10+bandwidth.getFurniture()*5+
+                                                bandwidth.getGrains()*5+bandwidth.getHouseholdProduct()*5+bandwidth.getPackedFood()*5+
+                                                bandwidth.getStationary()*5;
+                                        Log.d("SUM", String.valueOf(sum));
+                                        final DatabaseReference db=FirebaseDatabase.getInstance().getReference().child("donor").child(id);
+                                        db.child("donation_status").setValue((long)0);
+                                        db.child("userPoints").addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                Long temppoints=dataSnapshot.getValue(Long.class);
+                                                db.child("userPoints").setValue(temppoints+sum);
+                                                startActivity(new Intent(Scan.this,Home.class));
+                                            }
 
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
 
-                                        }
-                                    });
+                                            }
+                                        });
+                                    }else{
+                                        reference.child(auth.getUid()).child(id).child("industryItem")
+                                                .addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(final DataSnapshot dataSnapshot) {
+                                                        final String type = dataSnapshot.getValue(String.class);
+                                                        DatabaseReference db=FirebaseDatabase.getInstance().getReference()
+                                                                .child("donor").child(id);
+                                                        db.child("donation_status").setValue((long)0);
+                                                        db = db.child("userEcoCash");
+                                                        final DatabaseReference finalDb = db;
+                                                        db.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                                if(!dataSnapshot.exists()){
+                                                                    if(type.equals("E-waste")) {
+                                                                        finalDb.setValue((double)(input*1.25*10));
+                                                                    }else if(type.equals("Plastic")){
+                                                                        finalDb.setValue((double)(input*1.25*10));
+                                                                    }else if(type.equals("Paper")){
+                                                                        finalDb.setValue((double)(input*1.25*12));
+                                                                    }else if(type.equals("Organic")){
+                                                                        finalDb.setValue((double)(input*1.25*2));
+                                                                    }else if(type.equals("Glass")){
+                                                                        finalDb.setValue((double)(input*1.25*2));
+                                                                    }
+                                                                }else{
+                                                                    if(type.equals("E-waste")) {
+                                                                        finalDb.setValue(dataSnapshot.getValue(Double.class)+(double)(input*1.25*10));
+                                                                    }else if(type.equals("Plastic")){
+                                                                        finalDb.setValue(dataSnapshot.getValue(Double.class)+(double)(input*1.25*10));
+                                                                    }else if(type.equals("Paper")){
+                                                                        finalDb.setValue(dataSnapshot.getValue(Double.class)+(double)(input*1.25*12));
+                                                                    }else if(type.equals("Organic")){
+                                                                        finalDb.setValue(dataSnapshot.getValue(Double.class)+(double)(input*1.25*2));
+                                                                    }else if(type.equals("Glass")){
+                                                                        finalDb.setValue(dataSnapshot.getValue(Double.class)+(double)(input*1.25*2));
+                                                                    }
+                                                                }
+                                                                Long temppoints=dataSnapshot.getValue(Long.class);
+                                                                finalDb.child("userPoints").setValue(temppoints+sum);
+                                                                startActivity(new Intent(Scan.this,Home.class));
+                                                            }
+
+                                                            @Override
+                                                            public void onCancelled(DatabaseError databaseError) {
+
+                                                            }
+                                                        });
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(DatabaseError databaseError) {
+
+                                                    }
+                                                });
+                                    }
                                 }
                                 @Override
                                 public void onCancelled(DatabaseError databaseError) {
