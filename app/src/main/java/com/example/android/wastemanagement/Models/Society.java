@@ -2,13 +2,13 @@ package com.example.android.wastemanagement.Models;
 
 public class Society {
     String name, email;
-    long accOrganic, accPlastic, accGlass,userContact,reg_status;
+    long accOrganic, accPlastic, accGlass,userContact,reg_status, userEcoCash;
     String userAddress, sLat , sLong;
     String organiciKey, plasticiKey, glassiKey;
 
     public Society(String name, String email, long accOrganic, long accPlastic, long accGlass, long userContact,
                    long reg_status, String userAddress, String sLat, String sLong, String organiciKey, String plasticiKey,
-                   String glassiKey) {
+                   String glassiKey, long userEcoCash) {
         this.name = name;
         this.email = email;
         this.accOrganic = accOrganic;
@@ -22,9 +22,18 @@ public class Society {
         this.organiciKey = organiciKey;
         this.plasticiKey = plasticiKey;
         this.glassiKey = glassiKey;
+        this.userEcoCash = userEcoCash;
     }
 
     public Society(){}
+
+    public long getUserEcoCash() {
+        return userEcoCash;
+    }
+
+    public void setUserEcoCash(long userEcoCash) {
+        this.userEcoCash = userEcoCash;
+    }
 
     public String getName() {
         return name;

@@ -150,7 +150,7 @@ public class Register extends AppCompatActivity {
                                         DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("industry").child(auth.getUid());
                                         db.setValue(user);
                                     }else if(userType.equals("society")){
-                                        Society society=new Society(username,email,0,0,0,0,0,null,null,null,null,null,null);
+                                        Society society=new Society(username,email,0,0,0,0,0,null,null,null,null,null,null,0);
                                             DatabaseReference db=FirebaseDatabase.getInstance().getReference().child("society").child(auth.getUid());
                                             db.setValue(society);
                                         }

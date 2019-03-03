@@ -69,7 +69,7 @@ public class ApplyAsSociety extends AppCompatActivity {
                 }
                 else
                 {
-                    Society society=new Society(Nname,Nemail,0,0,0,Nmobile,1,Naddress,null,null,null,null,null);
+                    Society society=new Society(Nname,Nemail,0,0,0,Nmobile,1,Naddress,null,null,null,null,null,0);
                     accountref.setValue(society);
                     Toast.makeText(ApplyAsSociety.this, "Response Recorded", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(ApplyAsSociety.this, Home.class);

@@ -11,8 +11,8 @@
             android:visible="false"/>
         <item
             android:id="@+id/scan"
-            android:icon="@drawable/create_zone"
-            android:title="Scan"
+            android:icon="@drawable/maps"
+            android:title="Society Scan"
 
             />
         <item
@@ -23,19 +23,15 @@
             />
         <item
             android:id="@+id/wall"
-            android:icon="@drawable/maps"
+            android:icon="@drawable/ic_event_note_black_24dp"
             android:title="Wall"
-            />
-        <item
-            android:id="@+id/donationdrive"
-            android:icon="@drawable/maps"
-            android:title="Donation Drive"
             />
         <item
             android:id="@+id/map"
             android:icon="@drawable/maps"
             android:title="Map"
             android:visible="false"
+            />
             />
         <item
             android:id="@+id/accSetting"

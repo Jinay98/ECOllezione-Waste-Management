@@ -57,7 +57,6 @@
         <activity android:name=".Scan" />
         <activity android:name=".ScanQ" />
         <activity android:name=".Generate" />
-        <activity android:name=".DonationDrive"></activity>
     </application>
 
 </manifest>
