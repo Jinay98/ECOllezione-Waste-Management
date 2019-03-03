@@ -108,7 +108,7 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
     private TextView userName, userEmail , userPoints, filterName;
     EditText bandwidth;
     TextView textView;
-    DatabaseReference dbuser, dbtoken ,reff;
+    DatabaseReference dbuser, dbtoken ,reff,dbsociety;
     ImageView userImg, info;
     long userDonationStatus;
     String userType, userCity, userCardinal, infoDetails = "";
@@ -819,6 +819,8 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
                             ngoQR.setVisibility(View.VISIBLE);
                         }
                         else if(userType.equals("society")){
+                            donate_sell.setVisibility(View.GONE);
+                            ngoQR.setVisibility(View.VISIBLE);
                             Society user=dataSnapshot1.getValue(Society.class);
                             userName.setText(user.getName());
                             userEmail.setText(user.getEmail());
@@ -936,6 +938,11 @@ public class Home extends AppCompatActivity implements OnMapReadyCallback {
 
                                             Log.d("GlassKey",industryAllocatedGlass);
                                             Log.d("VALUE", String.valueOf(minGl));
+                                            dbsociety=FirebaseDatabase.getInstance().getReference().child("society").child(auth.getUid());
+                                            dbsociety.child("plasticiKey").setValue(industryAllocatedPlastic);
+                                            dbsociety.child("organiciKey").setValue(industryAllocatedOrganic);
+                                            dbsociety.child("glassiKey").setValue(industryAllocatedGlass);
+
 
                                         }
 
